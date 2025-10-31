@@ -1,305 +1,141 @@
-# Transaction Fraud Detection Dashboard
+# Fraud Analysis System
 
-A comprehensive, real-time dashboard for monitoring and analyzing transaction fraud detection systems. Built with React, Vite, and Tailwind CSS.
+A full-stack fraud detection and analysis platform built with React, Node.js, and MongoDB.
 
-![Dashboard Preview](https://img.shields.io/badge/Status-Production%20Ready-green)
-![React](https://img.shields.io/badge/React-18.2.0-blue)
-![Vite](https://img.shields.io/badge/Vite-5.0.8-purple)
-![Tailwind](https://img.shields.io/badge/Tailwind-3.3.6-cyan)
-
-## 🚀 Features
-
-### Core Dashboard Components
-
-- **📊 KPI Scorecard**: Real-time metrics including total transactions, fraud detection rates, and financial volumes
-- **🛡️ Risk Level Indicator**: Dynamic risk assessment with visual indicators and recommendations
-- **📋 Transaction Table**: Comprehensive transaction listing with sorting, filtering, and pagination
-- **🔍 Advanced Search & Filters**: Multi-criteria filtering system with real-time search capabilities
-- **⚡ System Status Monitor**: Live system health monitoring and performance metrics
-
-### Enhanced Features
-
-- **🎯 Navigation Sidebar**: Collapsible navigation with multiple dashboard sections
-- **🔔 Real-time Alerts**: Automated fraud detection notifications and system alerts
-- **📈 Quick Stats Widget**: Key performance indicators at a glance
-- **🔄 Auto-refresh**: Automatic data updates every 30 seconds
-- **📱 Responsive Design**: Optimized for desktop, tablet, and mobile devices
-
-## 🛠️ Technology Stack
-
-- **Frontend Framework**: React 18.2.0
-- **Build Tool**: Vite 5.0.8
-- **Styling**: Tailwind CSS 3.3.6
-- **Icons**: Lucide React
-- **State Management**: React Hooks (useState, useEffect, useMemo)
-- **Development**: Hot Module Replacement (HMR)
-
-## 📦 Installation
+## 🚀 Quick Start
 
 ### Prerequisites
+- Node.js (v18 or higher)
+- MongoDB - **See [MONGODB_SETUP.md](./MONGODB_SETUP.md)** for setup
+  - Recommended: MongoDB Atlas (free, no installation)
+  - Alternative: Local MongoDB installation
+- npm or yarn
 
-- Node.js (version 16 or higher)
-- npm or yarn package manager
+### 1. Install Dependencies
 
-### Setup Instructions
-
-1. **Clone or download the project files**
-   ```bash
-   # If you have the files locally, navigate to the project directory
-   cd transaction-dashboard
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
-   ```
-   Navigate to: http://localhost:5173/
-   ```
-
-## 🎮 Usage
-
-### Dashboard Navigation
-
-- **Dashboard**: Main overview with all key metrics and transaction data
-- **Analytics**: Advanced analytics and reporting (placeholder)
-- **Fraud Detection**: Real-time fraud detection engine configuration
-- **Risk Management**: Risk assessment and management tools
-- **Customers**: Customer management and KYC status
-- **Reports**: Generate and view detailed reports
-- **Settings**: System configuration and preferences
-
-### Key Interactions
-
-#### Search & Filtering
-- **Global Search**: Search across Transaction ID, Customer ID, Channel, or Status
-- **Quick Filters**: Dropdown filters for Status and Channel
-- **Advanced Filters**: 
-  - Multi-select status and channel options
-  - Date range picker
-  - Amount range inputs
-  - KYC status filtering
-
-#### Transaction Table
-- **Sorting**: Click column headers to sort data
-- **Pagination**: Navigate through large datasets
-- **Export**: Download transaction data (button available)
-- **View Details**: Click eye icon for detailed transaction view
-
-#### Real-time Features
-- **Auto-refresh**: Data updates every 30 seconds
-- **Manual Refresh**: Click refresh button in header
-- **Live Alerts**: Fraud detection notifications appear in bottom-right
-- **System Status**: Monitor system health in real-time
-
-## 📊 Sample Data
-
-The dashboard includes comprehensive sample data featuring:
-
-- **12 Sample Transactions** with realistic fraud/legitimate mix
-- **Multiple Channels**: Online Banking, Wire Transfer, Mobile App, ATM, POS, Web
-- **Various Transaction Amounts**: From $450 to $50,000
-- **KYC Status Indicators**: Verified and Pending statuses
-- **Fraud Detection Results**: Legitimate, Safe, and Fraud classifications
-
-## 🏗️ Project Structure
-
-```
-├── src/
-│   ├── App.jsx                 # Main application component
-│   ├── main.jsx               # Application entry point
-│   └── index.css              # Global styles
-├── components/
-│   ├── AlertSystem.js         # Real-time alert notifications
-│   ├── DashboardHeader.js     # Top navigation and controls
-│   ├── DashboardLayout.js     # Main dashboard layout
-│   ├── KPIScorecard.js        # Key performance indicators
-│   ├── NavigationSidebar.js   # Side navigation menu
-│   ├── QuickStats.js          # Quick statistics widget
-│   ├── RiskLevelIndicator.js  # Risk assessment display
-│   ├── SearchFilterBar.js     # Search and filtering controls
-│   ├── SystemStatus.js        # System health monitoring
-│   └── TransactionTable.js    # Transaction data table
-├── package.json               # Project dependencies
-├── vite.config.js            # Vite configuration
-├── tailwind.config.js        # Tailwind CSS configuration
-└── README.md                 # This file
+**Frontend:**
+```bash
+npm install
 ```
 
-## 🔧 Configuration
-
-### Vite Configuration
-The project is configured to handle JSX in `.js` files:
-
-```javascript
-// vite.config.js
-export default defineConfig({
-  plugins: [react()],
-  esbuild: {
-    loader: 'jsx',
-    include: /src\/.*\.[jt]sx?$/,
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      loader: { '.js': 'jsx' }
-    }
-  }
-})
+**Backend:**
+```bash
+cd server
+npm install
 ```
 
-### Tailwind CSS
-Configured for optimal performance with content scanning:
+### 2. Configure Environment
 
-```javascript
-// tailwind.config.js
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./*.{js,jsx}"
-  ],
-  // ... theme and plugins
-}
+**Frontend - Create `.env` in root:**
+```
+VITE_API_URL=http://localhost:5000/api
 ```
 
-## 🚀 Deployment
+**Backend - Update `server/.env`:**
+```
+MONGODB_URI=mongodb://localhost:27017/fraud-analysis
+JWT_SECRET=your-secret-key-here
+PORT=5000
+```
 
-### Build for Production
+### 3. Setup MongoDB
+
+**See [MONGODB_SETUP.md](./MONGODB_SETUP.md) for detailed instructions**
+
+Quick option: Use MongoDB Atlas (free, cloud-based, no installation)
+
+### 4. Start the Application
+
+**Terminal 1 - Start Backend:**
+```bash
+cd server
+npm run dev
+```
+
+**Terminal 2 - Start Frontend:**
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`
+
+## 📁 Project Structure
+
+```
+project/
+├── src/                    # React frontend
+│   ├── components/         # Reusable components
+│   ├── contexts/          # React contexts (Auth, etc.)
+│   ├── lib/               # API client & types
+│   ├── pages/             # Page components
+│   └── utils/             # Utility functions
+├── server/                # Node.js backend
+│   └── src/
+│       ├── config/        # Database config
+│       ├── models/        # Mongoose models
+│       ├── routes/        # API routes
+│       └── middleware/    # Auth middleware
+```
+
+## 🔐 Authentication
+
+- JWT-based authentication
+- Roles: Admin, Analyst, Viewer
+- Protected routes on both frontend and backend
+
+## 🎨 Features
+
+- 📊 Real-time transaction monitoring
+- 🔍 Fraud detection and risk scoring
+- 📈 Analytics dashboard
+- 👥 User management
+- 🔒 Role-based access control
+
+## 🛠️ Tech Stack
+
+**Frontend:**
+- React 18 + TypeScript
+- Vite
+- TailwindCSS
+- Axios
+- React Router
+- Recharts
+
+**Backend:**
+- Node.js + Express
+- MongoDB + Mongoose
+- JWT + bcrypt
+- CORS
+
+## 📚 API Documentation
+
+See [CONVERSION_NOTES.md](./CONVERSION_NOTES.md) for detailed API endpoints.
+
+## 🧪 Development
 
 ```bash
+# Run frontend in dev mode
+npm run dev
+
+# Build frontend for production
 npm run build
+
+# Run backend in dev mode
+cd server && npm run dev
+
+# Type check
+npm run typecheck
+
+# Lint code
+npm run lint
 ```
 
-### Preview Production Build
+## 🚢 Deployment
 
-```bash
-npm run preview
-```
+**Frontend:** Deploy `dist/` folder to Vercel, Netlify, or any static hosting
 
-### Deployment Options
+**Backend:** Deploy to Heroku, Railway, DigitalOcean, or AWS
 
-- **Vercel**: Connect your repository for automatic deployments
-- **Netlify**: Drag and drop the `dist` folder after building
-- **GitHub Pages**: Use GitHub Actions for automated deployment
-- **Traditional Hosting**: Upload the `dist` folder contents
+## 📝 License
 
-## 🔌 API Integration
-
-The dashboard is designed for easy backend integration. Replace sample data with API calls:
-
-### Example API Integration
-
-```javascript
-// In your components, replace sample data with:
-const [transactions, setTransactions] = useState([])
-
-useEffect(() => {
-  const fetchTransactions = async () => {
-    try {
-      const response = await fetch('/api/transactions')
-      const data = await response.json()
-      setTransactions(data)
-    } catch (error) {
-      console.error('Failed to fetch transactions:', error)
-    }
-  }
-  
-  fetchTransactions()
-}, [])
-```
-
-### Expected API Data Format
-
-```javascript
-{
-  "id": "TXN001",
-  "customerId": "CUST001", 
-  "amount": 1500.00,
-  "status": "Legitimate", // "Fraud", "Safe", "Legitimate"
-  "channel": "Online Banking",
-  "date": "2024-01-15",
-  "kycStatus": true, // boolean
-  "riskLevel": "Low" // "Low", "Medium", "High"
-}
-```
-
-## 🎨 Customization
-
-### Color Scheme
-The dashboard uses a professional color palette:
-- **Primary**: Blue (#3B82F6)
-- **Success**: Green (#10B981)
-- **Warning**: Yellow (#F59E0B)
-- **Danger**: Red (#EF4444)
-- **Gray Scale**: Various shades for backgrounds and text
-
-### Adding New Components
-1. Create component file in root directory
-2. Import in `src/App.jsx`
-3. Add to appropriate section in the dashboard
-
-### Modifying Metrics
-Update the KPI calculations in `KPIScorecard.js` to match your business requirements.
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **JSX Syntax Errors**: Ensure Vite configuration includes JSX loader
-2. **Tailwind Styles Not Loading**: Check `tailwind.config.js` content paths
-3. **Hot Reload Issues**: Restart the development server with `npm run dev`
-
-### Performance Optimization
-
-- Use `useMemo` for expensive calculations
-- Implement virtual scrolling for large datasets
-- Add loading states for better UX
-- Consider pagination for large transaction lists
-
-## 📈 Future Enhancements
-
-- [ ] Real-time WebSocket integration
-- [ ] Advanced data visualization charts
-- [ ] Export functionality (CSV, PDF)
-- [ ] User authentication and role-based access
-- [ ] Dark mode theme
-- [ ] Mobile app version
-- [ ] Advanced fraud detection algorithms
-- [ ] Machine learning integration
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Lucide React** for beautiful icons
-- **Tailwind CSS** for rapid UI development
-- **Vite** for lightning-fast development experience
-- **React Team** for the amazing framework
-
-## 📞 Support
-
-For support and questions:
-- Create an issue in the repository
-- Check the troubleshooting section above
-- Review the component documentation in the code
-
----
-
-**Built with ❤️ for fraud detection and financial security**
+MIT
