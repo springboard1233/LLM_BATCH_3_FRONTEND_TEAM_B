@@ -91,15 +91,22 @@ export function DashboardProvider({ children }) {
   const loadTransactions = useCallback(async (page = 1, filters = {}) => {
     try {
       setLoading(true);
-      const data = await apiService.getTransactions(page, 10, filters);
+      const response = await apiService.getTransactions(page, 10, filters);
+      console.log('API Response in Context:', response);
       
-      // Assuming the API returns { data: transactions, totalPages: number, currentPage: number }
-      dispatch({ type: ACTIONS.SET_TRANSACTIONS, payload: data.data || [] });
-      dispatch({ type: ACTIONS.SET_CURRENT_PAGE, payload: data.currentPage || page });
-      dispatch({ type: ACTIONS.SET_TOTAL_PAGES, payload: data.totalPages || 1 });
-      dispatch({ type: ACTIONS.SET_FILTERS, payload: filters });
+      // Make sure we're dispatching the correct data structure
+      dispatch({ 
+        type: ACTIONS.SET_TRANSACTIONS, 
+        payload: Array.isArray(response) ? response : response.data || [] 
+      });
+      
+      // Update pagination if available
+      if (response.totalPages) {
+        dispatch({ type: ACTIONS.SET_TOTAL_PAGES, payload: response.totalPages });
+      }
       setError(null);
     } catch (error) {
+      console.error('Error loading transactions:', error);
       setError(error.message);
     } finally {
       setLoading(false);
