@@ -1,6 +1,7 @@
 //Make sure to run "npm install recharts"
 
 import React, { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Shield, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -46,7 +47,46 @@ interface AnalyticsViewProps {
 }
 
 const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
+  // Backend data state
+  const [backendData, setBackendData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch data from backend on component mount
+  useEffect(() => {
+    const fetchAnalyticsData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch('http://localhost:8000/analytics/dashboard');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const analyticsData = await response.json();
+        setBackendData(analyticsData);
+        
+      } catch (err) {
+        console.warn('Failed to fetch analytics from backend:', err.message);
+        setError(err.message);
+        setBackendData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalyticsData();
+  }, []);
+
+  // Use backend data if available, otherwise fallback to local calculations
   const analyticsMetrics = useMemo(() => {
+    // Try to use backend data first
+    if (backendData?.analytics_metrics) {
+      return backendData.analytics_metrics;
+    }
+    
+    // Fallback to local calculations if no backend data
     if (!data || data.length === 0) {
       return {
         totalTransactions: 0,
@@ -78,11 +118,16 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
         : '0.00';
 
     return { totalTransactions, fraudRate, fraudLoss, legitimateVolume };
-  }, [data]);
+  }, [backendData, data]);
 
-  //Transaction Volume Chart
-  // Groups total transaction_amount by 'day'
+  //Transaction Volume Chart - Backend data or local calculation
   const volumeByDayData = useMemo(() => {
+    // Try to use backend data first
+    if (backendData?.volume_by_day_data) {
+      return backendData.volume_by_day_data;
+    }
+    
+    // Fallback to local calculations
     if (!data) return [];
     const dailyVolumes = new Map<number, number>();
 
@@ -98,10 +143,16 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
         (a, b) =>
           parseInt(a.name.split(' ')[1]) - parseInt(b.name.split(' ')[1])
       ); // Sort by day
-  }, [data]);
+  }, [backendData, data]);
 
-  //Channel Distribution
+  //Channel Distribution - Backend data or local calculation
   const channelData = useMemo(() => {
+    // Try to use backend data first
+    if (backendData?.channel_data) {
+      return backendData.channel_data;
+    }
+    
+    // Fallback to local calculations
     if (!data) return [];
     const counts = { mobile: 0, atm: 0, pos: 0, web: 0 };
 
@@ -118,10 +169,16 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
       { name: 'POS', value: counts.pos, color: COLORS.pie.pos },
       { name: 'Web', value: counts.web, color: COLORS.pie.web },
     ];
-  }, [data]);
+  }, [backendData, data]);
 
-  //Activity Heatmaps
+  //Activity Heatmaps - Backend data or local calculation
   const activityData = useMemo(() => {
+    // Try to use backend data first
+    if (backendData?.activity_data) {
+      return backendData.activity_data;
+    }
+    
+    // Fallback to local calculations
     if (!data) return { hourly: [], daily: [] };
 
     const hourlyCounts = new Array(24).fill(0);
@@ -145,7 +202,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
     }));
 
     return { hourly, daily };
-  }, [data]);
+  }, [backendData, data]);
 
   // For formatting currency on chart hover
   const formatCurrencyTooltip = (value: number) => {
@@ -160,6 +217,45 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
     return `${value.toLocaleString()} transactions`;
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            <div className="lg:col-span-2 h-80 bg-gray-200 rounded"></div>
+            <div className="h-80 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state with fallback notice
+  if (error && !backendData) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+          <p className="text-amber-800 text-sm">
+            <strong>Backend unavailable:</strong> Showing fallback data. {error}
+          </p>
+        </div>
+        {/* Continue with render even on error - fallback to local data */}
+      </div>
+    );
+  }
+
+  // Show success notification if using backend data
+  if (backendData && !loading) {
+    console.log('✅ Analytics loaded from backend API');
+  }
+
   return (
     <div className="p-6 space-y-6">
       <h2
@@ -167,6 +263,11 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
         style={{ color: COLORS.grayTitle }}
       >
         Analytics & Insights
+        {backendData && !loading && (
+          <span className="text-sm ml-2 text-green-600 font-normal">
+            (Backend data)
+          </span>
+        )}
       </h2>
 
       {/* Fraud Loss & Legitimate Volume Metrics */}
