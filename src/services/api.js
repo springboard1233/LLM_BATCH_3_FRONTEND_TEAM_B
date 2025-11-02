@@ -1,8 +1,9 @@
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 class ApiService {
   async makeRequest(endpoint, options = {}) {
     try {
+      console.log(`Making request to: ${API_BASE_URL}${endpoint}`);
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         headers: {
           'Content-Type': 'application/json',
@@ -19,7 +20,13 @@ class ApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      console.log(`Response from ${endpoint}:`, {
+        status: response.status,
+        data: data,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      return data;
     } catch (error) {
       console.error(`API request failed for ${endpoint}:`, error);
       throw error;
@@ -29,35 +36,57 @@ class ApiService {
   // Overview statistics
   async getOverviewStats() {
     try {
-      return await this.makeRequest('/overview/stats');
+      console.log('Fetching overview stats...');
+      const data = await this.makeRequest('/overview/stats');
+      
+      // Data validation and transformation
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid overview stats data format');
+      }
+      
+      const stats = {
+        total_records: parseInt(data.total_records) || 0,
+        fraud_cases: parseInt(data.fraud_cases) || 0,
+        non_fraud_cases: parseInt(data.non_fraud_cases) || 0,
+        fraud_percentage: parseFloat(data.fraud_percentage) || 0,
+        non_fraud_percentage: parseFloat(data.non_fraud_percentage) || 0
+      };
+      
+      console.log('Processed overview stats:', stats);
+      return stats;
     } catch (error) {
       console.error('Failed to fetch overview stats:', error);
-      return {
-        total_records: 0,
-        fraud_cases: 0,
-        non_fraud_cases: 0,
-        fraud_percentage: 0
-      };
+      throw error; // Let the component handle the error
     }
   }
 
   // Transaction insights
   async getTransactionInsights() {
     try {
-      return await this.makeRequest('/insights/transaction_amounts');
+      console.log('Fetching transaction insights...');
+      const data = await this.makeRequest('/insights/transaction_amounts');
+      
+      // Transform the data to match frontend requirements
+      return {
+        averageAmount: parseFloat(data.avg_amount || 0).toFixed(2),
+        maxAmount: parseFloat(data.max_amount || 0).toFixed(2),
+        minAmount: parseFloat(data.min_amount || 0).toFixed(2)
+      };
     } catch (error) {
       console.error('Failed to fetch transaction insights:', error);
-      return { insights: [] };
+      throw error;
     }
   }
 
   // Fraud trends
   async getFraudTrends() {
     try {
-      return await this.makeRequest('/analytics/fraud_trend');
+      const data = await this.makeRequest('/analytics/fraud_trend');
+      // Ensure data is an array and transform if needed
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('Failed to fetch fraud trends:', error);
-      return [];
+      throw error;
     }
   }
 
@@ -86,10 +115,12 @@ class ApiService {
   // Get suspicious transactions
   async getSuspiciousTransactions() {
     try {
-      return await this.makeRequest('/alerts/suspicious');
+      const data = await this.makeRequest('/alerts/suspicious');
+      // Ensure data is an array and transform if needed
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('Failed to fetch suspicious transactions:', error);
-      return [];
+      throw error;
     }
   }
 
@@ -102,10 +133,28 @@ class ApiService {
         ...filters
       };
       const queryString = new URLSearchParams(params).toString();
-      return await this.makeRequest(`/filter/transactions?${queryString}`);
+      const response = await this.makeRequest(`/filter/transactions?${queryString}`);
+      
+      // Ensure consistent data structure
+      const transformedData = Array.isArray(response) ? response : response.data || [];
+      
+      return {
+        data: transformedData.map(t => ({
+          id: t._id || t.id,
+          customerId: t.customer_id,
+          date: t.timestamp,
+          channel: t.channel_mobile ? 'Mobile' : 'Web',
+          amount: parseFloat(t.transaction_amount || 0),
+          kycStatus: Boolean(t.kyc_status),
+          status: t.is_fraud ? 'Fraud' : 'Legitimate'
+        })),
+        totalPages: Math.ceil(transformedData.length / limit),
+        currentPage: page,
+        total: transformedData.length
+      };
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
-      return { data: [], totalPages: 0, currentPage: 1, total: 0 };
+      throw error;
     }
   }
 }
