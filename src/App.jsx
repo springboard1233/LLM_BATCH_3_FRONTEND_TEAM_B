@@ -20,6 +20,7 @@ import SearchFilterBar from '../SearchFilterBar.jsx'
 import TransactionTable from '../TransactionTable.jsx'
 import KeyPerformanceIndicators from '../KeyPerformanceIndicators.jsx'
 import { DashboardProvider, useDashboard } from './contexts/DashboardContext'
+import AnalyticsView from '../AnalyticsView.jsx'
 
 function App() {
   return (
@@ -132,6 +133,15 @@ function AppContent() {
               transactions={transactions}
               isLoading={isLoading}
             />
+          </div>
+        )
+      case 'analytics':
+        return (
+          <div className="space-y-6">
+            <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+              <h3 className="text-xl font-semibold mb-4">Analytics & Insights</h3>
+              <AnalyticsView data={transactions} />
+            </div>
           </div>
         )
 

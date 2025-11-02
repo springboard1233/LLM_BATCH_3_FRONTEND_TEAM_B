@@ -1,7 +1,6 @@
 //Make sure to run "npm install recharts"
 
-import React, { useMemo } from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Shield, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -42,11 +41,7 @@ const COLORS = {
 
 //Main part in Analytics
 
-interface AnalyticsViewProps {
-  data: any[];
-}
-
-const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
+const AnalyticsView = ({ data }) => {
   // Backend data state
   const [backendData, setBackendData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,18 +53,17 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await fetch('http://localhost:8000/analytics/dashboard');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const analyticsData = await response.json();
         setBackendData(analyticsData);
-        
       } catch (err) {
-        console.warn('Failed to fetch analytics from backend:', err.message);
-        setError(err.message);
+        console.warn('Failed to fetch analytics from backend:', err && err.message ? err.message : err);
+        setError(err && err.message ? err.message : String(err));
         setBackendData(null);
       } finally {
         setLoading(false);
@@ -82,10 +76,10 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
   // Use backend data if available, otherwise fallback to local calculations
   const analyticsMetrics = useMemo(() => {
     // Try to use backend data first
-    if (backendData?.analytics_metrics) {
+    if (backendData && backendData.analytics_metrics) {
       return backendData.analytics_metrics;
     }
-    
+
     // Fallback to local calculations if no backend data
     if (!data || data.length === 0) {
       return {
@@ -123,13 +117,13 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
   //Transaction Volume Chart - Backend data or local calculation
   const volumeByDayData = useMemo(() => {
     // Try to use backend data first
-    if (backendData?.volume_by_day_data) {
+    if (backendData && backendData.volume_by_day_data) {
       return backendData.volume_by_day_data;
     }
-    
+
     // Fallback to local calculations
     if (!data) return [];
-    const dailyVolumes = new Map<number, number>();
+    const dailyVolumes = new Map();
 
     data.forEach((t) => {
       const day = t.day;
@@ -141,17 +135,17 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
       .map(([day, volume]) => ({ name: `Day ${day}`, volume }))
       .sort(
         (a, b) =>
-          parseInt(a.name.split(' ')[1]) - parseInt(b.name.split(' ')[1])
+          parseInt(a.name.split(' ')[1], 10) - parseInt(b.name.split(' ')[1], 10)
       ); // Sort by day
   }, [backendData, data]);
 
   //Channel Distribution - Backend data or local calculation
   const channelData = useMemo(() => {
     // Try to use backend data first
-    if (backendData?.channel_data) {
+    if (backendData && backendData.channel_data) {
       return backendData.channel_data;
     }
-    
+
     // Fallback to local calculations
     if (!data) return [];
     const counts = { mobile: 0, atm: 0, pos: 0, web: 0 };
@@ -174,10 +168,10 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
   //Activity Heatmaps - Backend data or local calculation
   const activityData = useMemo(() => {
     // Try to use backend data first
-    if (backendData?.activity_data) {
+    if (backendData && backendData.activity_data) {
       return backendData.activity_data;
     }
-    
+
     // Fallback to local calculations
     if (!data) return { hourly: [], daily: [] };
 
@@ -188,8 +182,8 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
     data.forEach((t) => {
       const hour = t.hour; // Assuming 'hour' column 0-23
       const weekday = t.weekday; // Assuming 'weekday' column 0-6
-      if (hour >= 0 && hour <= 23) hourlyCounts[hour]++;
-      if (weekday >= 0 && weekday <= 6) dailyCounts[weekday]++;
+      if (typeof hour === 'number' && hour >= 0 && hour <= 23) hourlyCounts[hour]++;
+      if (typeof weekday === 'number' && weekday >= 0 && weekday <= 6) dailyCounts[weekday]++;
     });
 
     const hourly = hourlyCounts.map((count, i) => ({
@@ -205,16 +199,18 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
   }, [backendData, data]);
 
   // For formatting currency on chart hover
-  const formatCurrencyTooltip = (value: number) => {
-    return `₹${value.toLocaleString('en-IN', {
+  const formatCurrencyTooltip = (value) => {
+    if (value == null) return value;
+    return `₹${Number(value).toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   };
 
   // For formatting simple counts on chart hover
-  const formatCountTooltip = (value: number) => {
-    return `${value.toLocaleString()} transactions`;
+  const formatCountTooltip = (value) => {
+    if (value == null) return value;
+    return `${Number(value).toLocaleString()} transactions`;
   };
 
   // Loading state
@@ -253,6 +249,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
 
   // Show success notification if using backend data
   if (backendData && !loading) {
+    // eslint-disable-next-line no-console
     console.log('✅ Analytics loaded from backend API');
   }
 
@@ -275,7 +272,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
         {[
           {
             title: 'Fraud Loss',
-            value: `₹${analyticsMetrics.fraudLoss.toLocaleString('en-IN', {
+            value: `₹${Number(analyticsMetrics.fraudLoss || 0).toLocaleString('en-IN', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}`,
@@ -285,17 +282,17 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
           },
           {
             title: 'Legitimate Volume',
-            value: `₹${analyticsMetrics.legitimateVolume.toLocaleString(
+            value: `₹${Number(analyticsMetrics.legitimateVolume || 0).toLocaleString(
               'en-IN',
               { minimumFractionDigits: 2, maximumFractionDigits: 2 }
             )}`,
             icon: CheckCircle,
-            color: COLORS.success, 
+            color: COLORS.success,
             iconColor: COLORS.success,
           },
           {
             title: 'Total Transactions',
-            value: analyticsMetrics.totalTransactions.toLocaleString(),
+            value: (analyticsMetrics.totalTransactions || 0).toLocaleString(),
             icon: Activity,
             color: COLORS.primary,
             iconColor: COLORS.primary,
@@ -326,7 +323,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
                 </p>
                 <p
                   className="text-xl font-bold mt-1"
-                  style={{ color: stat.color }} 
+                  style={{ color: stat.color }}
                 >
                   {stat.value}
                 </p>
@@ -358,7 +355,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
             className="text-lg font-semibold mb-4"
             style={{ color: COLORS.grayTitle }}
           >
-            Transaction Volume Over Time 
+            Transaction Volume Over Time
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
@@ -372,14 +369,14 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
               <XAxis
                 dataKey="name"
                 fontSize={12}
-                stroke={COLORS.grayText} 
+                stroke={COLORS.grayText}
               />
               <YAxis
                 fontSize={12}
-                stroke={COLORS.grayText} 
+                stroke={COLORS.grayText}
                 tickFormatter={(val) => `₹${val / 1000}k`}
               />
-              <Tooltip formatter={formatCurrencyTooltip} />
+              <Tooltip formatter={(value) => formatCurrencyTooltip(value)} />
               <Bar
                 dataKey="volume"
                 fill={COLORS.primary}
@@ -421,7 +418,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number, name: string) => [
+                formatter={(value, name) => [
                   `${value.toLocaleString()} txns`,
                   name,
                 ]}
@@ -462,15 +459,15 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke={COLORS.grayBorder} 
+                  stroke={COLORS.grayBorder}
                 />
                 <XAxis
                   dataKey="name"
                   fontSize={10}
-                  stroke={COLORS.grayText} 
+                  stroke={COLORS.grayText}
                 />
                 <YAxis fontSize={10} stroke={COLORS.grayText} />
-                <Tooltip formatter={formatCountTooltip} />
+                <Tooltip formatter={(value) => formatCountTooltip(value)} />
                 <Bar
                   dataKey="transactions"
                   fill={COLORS.warning}
@@ -495,15 +492,15 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ data }) => {
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke={COLORS.grayBorder} 
+                  stroke={COLORS.grayBorder}
                 />
                 <XAxis
                   dataKey="name"
                   fontSize={12}
-                  stroke={COLORS.grayText} 
+                  stroke={COLORS.grayText}
                 />
                 <YAxis fontSize={10} stroke={COLORS.grayText} />
-                <Tooltip formatter={formatCountTooltip} />
+                <Tooltip formatter={(value) => formatCountTooltip(value)} />
                 <Bar
                   dataKey="transactions"
                   fill={COLORS.success}
