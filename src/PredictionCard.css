@@ -1,0 +1,45 @@
+/* PredictionCard.css - clean minimal styles */
+.pc-card{
+  width:460px;
+  background:linear-gradient(180deg,#fff,#fbfdff);
+  border-radius:12px;
+  padding:16px;
+  box-shadow:0 8px 20px rgba(15,23,42,0.06);
+  border:1px solid rgba(15,23,42,0.04);
+  font-family: Inter, system-ui, Arial, sans-serif;
+  color:#0f172a;
+}
+.pc-top{display:flex;justify-content:space-between;align-items:center}
+.pc-left{display:flex;gap:12px;align-items:center}
+.pc-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.pc-info{}
+.pc-tid{font-weight:600;margin-bottom:4px}
+.pc-sub{font-size:13px;color:#6b7280}
+.pc-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.pc-amount{font-weight:700}
+.pc-badge{padding:6px 10px;border-radius:999px;font-weight:700;font-size:13px}
+
+/* themes */
+.pc-safe .pc-icon{background:#ecfdf5;color:#059669}
+.pc-fraud .pc-icon{background:#fff1f2;color:#dc2626}
+.pc-badge-safe{background:#ecfdf5;color:#065f46;border:1px solid rgba(6,95,70,0.06)}
+.pc-badge-fraud{background:#fff1f2;color:#7f1d1d;border:1px solid rgba(127,29,29,0.06)}
+
+.pc-bar-row{display:flex;gap:12px;align-items:center;margin-top:12px}
+.pc-percent{width:56px;font-weight:700}
+.pc-bar-wrap{flex:1;display:flex;flex-direction:column;gap:6px}
+.pc-bar-bg{width:100%;height:12px;background:#eef2f7;border-radius:999px;overflow:hidden}
+.pc-bar-fill{height:100%;border-radius:999px;transition:width .6s ease}
+.pc-bar-safe{background:linear-gradient(90deg,#34d399,#059669)}
+.pc-bar-fraud{background:linear-gradient(90deg,#fb7185,#ef4444)}
+.pc-scale{display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-top:6px}
+
+.pc-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.pc-message{color:#374151}
+.pc-btn{padding:8px 12px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);background:#fff;cursor:pointer}
+
+/* small responsive */
+@media (max-width:520px){
+  .pc-card{width:100%;padding:12px}
+  .pc-amount{display:none}
+}

@@ -1,3 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+html,body,#root{height:100%;margin:0;padding:0}
+body{font-family:Inter,system-ui,Arial;background:#f3f7fb}
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+input, select {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+input:focus, select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+
+label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+}

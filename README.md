@@ -1,141 +1,70 @@
-# Fraud Analysis System
+# Getting Started with Create React App
 
-A full-stack fraud detection and analysis platform built with React, Node.js, and MongoDB.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## 🚀 Quick Start
+## Available Scripts
 
-### Prerequisites
-- Node.js (v18 or higher)
-- MongoDB - **See [MONGODB_SETUP.md](./MONGODB_SETUP.md)** for setup
-  - Recommended: MongoDB Atlas (free, no installation)
-  - Alternative: Local MongoDB installation
-- npm or yarn
+In the project directory, you can run:
 
-### 1. Install Dependencies
+### `npm start`
 
-**Frontend:**
-```bash
-npm install
-```
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-**Backend:**
-```bash
-cd server
-npm install
-```
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-### 2. Configure Environment
+### `npm test`
 
-**Frontend - Create `.env` in root:**
-```
-VITE_API_URL=http://localhost:5000/api
-```
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-**Backend - Update `server/.env`:**
-```
-MONGODB_URI=mongodb://localhost:27017/fraud-analysis
-JWT_SECRET=your-secret-key-here
-PORT=5000
-```
+### `npm run build`
 
-### 3. Setup MongoDB
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-**See [MONGODB_SETUP.md](./MONGODB_SETUP.md) for detailed instructions**
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-Quick option: Use MongoDB Atlas (free, cloud-based, no installation)
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### 4. Start the Application
+### `npm run eject`
 
-**Terminal 1 - Start Backend:**
-```bash
-cd server
-npm run dev
-```
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-**Terminal 2 - Start Frontend:**
-```bash
-npm run dev
-```
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-The app will be available at `http://localhost:5173`
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-## 📁 Project Structure
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-```
-project/
-├── src/                    # React frontend
-│   ├── components/         # Reusable components
-│   ├── contexts/          # React contexts (Auth, etc.)
-│   ├── lib/               # API client & types
-│   ├── pages/             # Page components
-│   └── utils/             # Utility functions
-├── server/                # Node.js backend
-│   └── src/
-│       ├── config/        # Database config
-│       ├── models/        # Mongoose models
-│       ├── routes/        # API routes
-│       └── middleware/    # Auth middleware
-```
+## Learn More
 
-## 🔐 Authentication
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-- JWT-based authentication
-- Roles: Admin, Analyst, Viewer
-- Protected routes on both frontend and backend
+To learn React, check out the [React documentation](https://reactjs.org/).
 
-## 🎨 Features
+### Code Splitting
 
-- 📊 Real-time transaction monitoring
-- 🔍 Fraud detection and risk scoring
-- 📈 Analytics dashboard
-- 👥 User management
-- 🔒 Role-based access control
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-## 🛠️ Tech Stack
+### Analyzing the Bundle Size
 
-**Frontend:**
-- React 18 + TypeScript
-- Vite
-- TailwindCSS
-- Axios
-- React Router
-- Recharts
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-**Backend:**
-- Node.js + Express
-- MongoDB + Mongoose
-- JWT + bcrypt
-- CORS
+### Making a Progressive Web App
 
-## 📚 API Documentation
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-See [CONVERSION_NOTES.md](./CONVERSION_NOTES.md) for detailed API endpoints.
+### Advanced Configuration
 
-## 🧪 Development
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-```bash
-# Run frontend in dev mode
-npm run dev
+### Deployment
 
-# Build frontend for production
-npm run build
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
-# Run backend in dev mode
-cd server && npm run dev
+### `npm run build` fails to minify
 
-# Type check
-npm run typecheck
-
-# Lint code
-npm run lint
-```
-
-## 🚢 Deployment
-
-**Frontend:** Deploy `dist/` folder to Vercel, Netlify, or any static hosting
-
-**Backend:** Deploy to Heroku, Railway, DigitalOcean, or AWS
-
-## 📝 License
-
-MIT
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
