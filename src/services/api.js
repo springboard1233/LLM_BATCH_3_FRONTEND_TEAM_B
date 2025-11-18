@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 class ApiService {
   async makeRequest(endpoint, options = {}) {
@@ -81,8 +81,8 @@ class ApiService {
   // Fraud trends
   async getFraudTrends() {
     try {
+      // Changed from '/analytics/fraud-trend' to '/analytics/fraud_trend'
       const data = await this.makeRequest('/analytics/fraud_trend');
-      // Ensure data is an array and transform if needed
       return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('Failed to fetch fraud trends:', error);
@@ -93,7 +93,9 @@ class ApiService {
   // Fraud by channel
   async getFraudByChannel() {
     try {
-      return await this.makeRequest('/analytics/fraud_by_channel');
+      // Changed from '/analytics/fraud-by-channel' to '/analytics/fraud_by_channel'
+      const data = await this.makeRequest('/analytics/fraud_by_channel');
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('Failed to fetch fraud by channel:', error);
       return [];
@@ -154,6 +156,21 @@ class ApiService {
       };
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
+      throw error;
+    }
+  }
+
+  async predictFraud(payload) {
+    try {
+      if (!payload) {
+        throw new Error('Missing transaction payload');
+      }
+      return await this.makeRequest('/prediction/predict', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+    } catch (error) {
+      console.error('Failed to run fraud prediction:', error);
       throw error;
     }
   }

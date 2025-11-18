@@ -21,6 +21,7 @@ import TransactionTable from '../TransactionTable.jsx'
 import KeyPerformanceIndicators from '../KeyPerformanceIndicators.jsx'
 import { DashboardProvider, useDashboard } from './contexts/DashboardContext'
 import AnalyticsView from '../AnalyticsView.jsx'
+import FraudDetection from '../FraudDetection.jsx'
 
 function App() {
   return (
@@ -68,6 +69,7 @@ function AppContent() {
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'analytics', label: 'Analytics' },
+    { id: 'fraud-detection', label: 'Fraud Detection' },
     { id: 'transaction-management', label: 'Transaction Management' },
     { id: 'risk-analysis', label: 'Risk Analysis' },
     { id: 'activity-map', label: 'Activity Map' },
@@ -144,6 +146,15 @@ function AppContent() {
             </div>
           </div>
         )
+      case 'fraud-detection':
+        return (
+          <div className="space-y-6">
+            <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+              <h3 className="text-xl font-semibold mb-4">Fraud Detection Lab</h3>
+              <FraudDetection />
+            </div>
+          </div>
+        )
 
       case 'export':
         return (
@@ -194,7 +205,11 @@ function AppContent() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 relative overflow-hidden">
-      <NavigationSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+      <NavigationSidebar
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        items={navigationItems}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         {renderHeader()}

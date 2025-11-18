@@ -54,7 +54,7 @@ const AnalyticsView = ({ data }) => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch('http://localhost:8000/analytics/dashboard');
+        const response = await fetch('http://localhost:8000/api/analytics/dashboard');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
