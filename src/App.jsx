@@ -6,7 +6,7 @@ import DashboardHeader from '../DashboardHeader.jsx'
 import NavigationSidebar from '../NavigationSidebar.jsx'
 import SystemStatus from '../SystemStatus.jsx'
 import QuickStats from '../QuickStats.jsx'
-import { SettingsProvider } from './contexts/SettingsContext.jsx'
+import { SettingsProvider, useSettings } from './contexts/SettingsContext.jsx'
 
 import DataUploadZone from './components/DataUploadZone'
 import LiveToggle from './components/LiveToggle'
@@ -21,6 +21,9 @@ import TransactionTable from '../TransactionTable.jsx'
 import KeyPerformanceIndicators from '../KeyPerformanceIndicators.jsx'
 import { DashboardProvider, useDashboard } from './contexts/DashboardContext'
 import AnalyticsView from '../AnalyticsView.jsx'
+import FraudDetection from '../FraudDetection.jsx'
+import TransactionManagement from '../TransactionManagement'
+import RiskAnalysis from '../RiskAnalysis'
 
 function App() {
   return (
@@ -33,6 +36,10 @@ function App() {
 }
 
 function AppContent() {
+  // 🔥 THE FIX — IMPORT EFFECTIVE THEME
+  const { effectiveTheme } = useSettings();
+  const isDarkTheme = effectiveTheme === 'dark';
+
   const [isLiveStream, setIsLiveStream] = useState(false)
   const [uploadedFile, setUploadedFile] = useState(null)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -43,7 +50,7 @@ function AppContent() {
   const [isExporting, setIsExporting] = useState(false)
   const [toast, setToast] = useState(null)
 
-  // ✅ fetch data from FastAPI (provided by DashboardProvider)
+  // Backend data
   const { 
     transactions, 
     loading: isLoading, 
@@ -68,6 +75,7 @@ function AppContent() {
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'analytics', label: 'Analytics' },
+    { id: 'fraud-detection', label: 'Fraud Detection' },
     { id: 'transaction-management', label: 'Transaction Management' },
     { id: 'risk-analysis', label: 'Risk Analysis' },
     { id: 'activity-map', label: 'Activity Map' },
@@ -135,12 +143,39 @@ function AppContent() {
             />
           </div>
         )
+
       case 'analytics':
         return (
           <div className="space-y-6">
             <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
               <h3 className="text-xl font-semibold mb-4">Analytics & Insights</h3>
               <AnalyticsView data={transactions} />
+            </div>
+          </div>
+        )
+
+      case 'transaction-management':
+        return (
+          <div className="space-y-6">
+            {/* 🔥 FIXED THEME PROP */}
+            <TransactionManagement theme={isDarkTheme ? 'dark' : 'light'} />
+          </div>
+        )
+
+      case 'risk-analysis':
+        return (
+          <div className="space-y-6">
+            {/* 🔥 FIXED THEME PROP */}
+            <RiskAnalysis theme={isDarkTheme ? 'dark' : 'light'} />
+          </div>
+        )
+
+      case 'fraud-detection':
+        return (
+          <div className="space-y-6">
+            <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+              <h3 className="text-xl font-semibold mb-4">Fraud Detection Lab</h3>
+              <FraudDetection />
             </div>
           </div>
         )
@@ -194,7 +229,11 @@ function AppContent() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 relative overflow-hidden">
-      <NavigationSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+      <NavigationSidebar
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        items={navigationItems}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         {renderHeader()}
