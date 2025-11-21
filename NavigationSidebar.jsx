@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useTranslation } from './src/hooks/useTranslation'
+import { useSettings } from './src/contexts/SettingsContext'
 
 export default function NavigationSidebar({
   activeSection = "dashboard",
@@ -19,7 +20,11 @@ export default function NavigationSidebar({
   items, // ✅ new dynamic prop
 }) {
   const { t } = useTranslation();
+  const { effectiveTheme } = useSettings();
+  const isDarkTheme = effectiveTheme === 'dark';
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
 
   // ✅ fallback if no items prop is passed
   const navigationItems =
@@ -70,12 +75,16 @@ export default function NavigationSidebar({
 
   return (
     <div
-      className={`bg-black/30 backdrop-blur-md border-r border-white/10 text-white transition-all duration-300 ${
+      className={`transition-all duration-300 ${
         isCollapsed ? "w-16" : "w-64"
-      } min-h-screen flex flex-col`}
+      } min-h-screen flex flex-col ${
+        isDarkTheme 
+          ? 'bg-black/30 backdrop-blur-md border-r border-white/10 text-white' 
+          : 'bg-white border-r border-gray-200 text-gray-900 shadow-sm'
+      }`}
     >
       {/* Header */}
-      <div className="p-4 border-b border-white/10">
+      <div className={`p-4 border-b ${isDarkTheme ? 'border-white/10' : 'border-gray-200'}`}>
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center space-x-2">
@@ -84,14 +93,16 @@ export default function NavigationSidebar({
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-ping"></div>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white">SecureGuard</h2>
+                <h2 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>SecureGuard</h2>
                 <p className="text-xs text-emerald-400">AI Fraud Detection</p>
               </div>
             </div>
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+            className={`p-1 rounded-lg transition-colors ${
+              isDarkTheme ? 'hover:bg-white/10' : 'hover:bg-gray-100'
+            }`}
           >
             {isCollapsed ? (
               <ChevronRight className="w-5 h-5" />
@@ -113,7 +124,9 @@ export default function NavigationSidebar({
               className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300 ${
                 activeSection === item.id
                   ? "bg-gradient-to-r from-emerald-500 to-blue-500 text-white shadow-lg shadow-emerald-500/25"
-                  : "text-gray-300 hover:bg-white/10 hover:text-white"
+                  : isDarkTheme 
+                    ? "text-gray-300 hover:bg-white/10 hover:text-white"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
               {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
@@ -125,8 +138,39 @@ export default function NavigationSidebar({
         })}
       </nav>
 
-      {/* Compact Status Indicator */}
-      <div className="p-4 border-t border-white/10">
+      {/* User Actions */}
+      <div className={`p-4 border-t ${isDarkTheme ? 'border-white/10' : 'border-gray-200'}`}>
+        {!isCollapsed && (
+          <div className="space-y-2 mb-4">
+            <button 
+              onClick={() => setShowLogin(true)}
+              className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isDarkTheme 
+                  ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20' 
+                  : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+              }`}>
+              Login
+            </button>
+            <button 
+              onClick={() => setShowSignup(true)}
+              className={`w-full px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                isDarkTheme 
+                  ? 'border-white/20 text-gray-300 hover:bg-white/5' 
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}>
+              Sign Up
+            </button>
+            <button className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isDarkTheme 
+                ? 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20' 
+                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+            }`}>
+              Guest Mode
+            </button>
+          </div>
+        )}
+        
+        {/* Compact Status Indicator */}
         {isCollapsed ? (
           <div className="flex justify-center">
             <div
@@ -135,19 +179,177 @@ export default function NavigationSidebar({
             ></div>
           </div>
         ) : (
-          <div className="flex items-center space-x-2 px-3 py-2 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 cursor-default">
+          <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg border cursor-default ${
+            isDarkTheme 
+              ? 'bg-white/5 backdrop-blur-sm border-white/10' 
+              : 'bg-gray-50 border-gray-200'
+          }`}>
             <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
             <div className="flex-1">
               <span className="text-xs font-medium text-emerald-400">
                 System Online
               </span>
-              <div className="text-xs text-gray-400 mt-0.5">
+              <div className={`text-xs mt-0.5 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                 All services operational
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Login Modal */}
+      {showLogin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl p-8 ${
+            isDarkTheme ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+          }`}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Login</h2>
+              <button 
+                onClick={() => setShowLogin(false)}
+                className={`p-2 rounded-lg transition-colors ${
+                  isDarkTheme ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
+                }`}
+              >
+                ✕
+              </button>
+            </div>
+            <form className="space-y-4">
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-lg hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 font-semibold"
+              >
+                Login
+              </button>
+              <p className={`text-center text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                Don't have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLogin(false);
+                    setShowSignup(true);
+                  }}
+                  className="text-emerald-500 hover:text-emerald-600 font-medium"
+                >
+                  Sign up
+                </button>
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Signup Modal */}
+      {showSignup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl p-8 ${
+            isDarkTheme ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+          }`}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Sign Up</h2>
+              <button 
+                onClick={() => setShowSignup(false)}
+                className={`p-2 rounded-lg transition-colors ${
+                  isDarkTheme ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
+                }`}
+              >
+                ✕
+              </button>
+            </div>
+            <form className="space-y-4">
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter your name"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Create a password"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-lg hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 font-semibold"
+              >
+                Create Account
+              </button>
+              <p className={`text-center text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSignup(false);
+                    setShowLogin(true);
+                  }}
+                  className="text-emerald-500 hover:text-emerald-600 font-medium"
+                >
+                  Login
+                </button>
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

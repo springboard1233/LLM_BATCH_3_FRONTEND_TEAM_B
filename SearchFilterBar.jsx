@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Search, Filter, X, Calendar, DollarSign } from 'lucide-react'
+import { useSettings } from './src/contexts/SettingsContext'
 
 export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
+  const { effectiveTheme } = useSettings();
+  const isDarkTheme = effectiveTheme === 'dark';
   const [searchTerm, setSearchTerm] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
@@ -66,9 +69,11 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
     filters.kycStatus.length > 0
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div className={`rounded-xl shadow-sm border p-6 ${
+      isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+    }`}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Search & Filter</h3>
+        <h3 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Search & Filter</h3>
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
@@ -87,7 +92,11 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
           placeholder="Search by Transaction ID, Customer ID, Channel, or Status..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className={`w-full pl-10 pr-4 py-3 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            isDarkTheme 
+              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+              : 'bg-white border-gray-300 text-gray-900'
+          }`}
         />
       </div>
 
@@ -103,11 +112,15 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
         </button>
 
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600">Status:</span>
+          <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>Status:</span>
           <select
             value={filters.status.length === 1 ? filters.status[0] : ''}
             onChange={(e) => handleFilterChange('status', e.target.value ? [e.target.value] : [])}
-            className="text-sm border border-gray-300 rounded px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className={`text-sm border rounded px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              isDarkTheme 
+                ? 'bg-gray-700 border-gray-600 text-white' 
+                : 'bg-white border-gray-300 text-gray-900'
+            }`}
           >
             <option value="">All Status</option>
             {filterOptions.statuses.map(status => (
@@ -117,11 +130,15 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600">Channel:</span>
+          <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>Channel:</span>
           <select
             value={filters.channels.length === 1 ? filters.channels[0] : ''}
             onChange={(e) => handleFilterChange('channels', e.target.value ? [e.target.value] : [])}
-            className="text-sm border border-gray-300 rounded px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className={`text-sm border rounded px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              isDarkTheme 
+                ? 'bg-gray-700 border-gray-600 text-white' 
+                : 'bg-white border-gray-300 text-gray-900'
+            }`}
           >
             <option value="">All Channels</option>
             {filterOptions.channels.map(channel => (
@@ -132,10 +149,10 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
       </div>
 
       {showFilters && (
-        <div className="border-t border-gray-200 pt-4 space-y-4">
+        <div className={`border-t pt-4 space-y-4 ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Status</label>
               <div className="space-y-2">
                 {filterOptions.statuses.map(status => (
                   <label key={status} className="flex items-center">
@@ -145,14 +162,14 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
                       onChange={() => handleMultiSelectChange('status', status)}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">{status}</span>
+                    <span className={`ml-2 text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{status}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Channels</label>
+              <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Channels</label>
               <div className="space-y-2">
                 {filterOptions.channels.map(channel => (
                   <label key={channel} className="flex items-center">
@@ -162,14 +179,14 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
                       onChange={() => handleMultiSelectChange('channels', channel)}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">{channel}</span>
+                    <span className={`ml-2 text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{channel}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
                 <Calendar className="w-4 h-4 inline mr-1" />
                 Date Range
               </label>
@@ -178,21 +195,29 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
                   type="date"
                   value={filters.dateRange.start}
                   onChange={(e) => handleFilterChange('dateRange', { ...filters.dateRange, start: e.target.value })}
-                  className="w-full text-sm border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full text-sm border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white [color-scheme:dark]' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                   placeholder="Start Date"
                 />
                 <input
                   type="date"
                   value={filters.dateRange.end}
                   onChange={(e) => handleFilterChange('dateRange', { ...filters.dateRange, end: e.target.value })}
-                  className="w-full text-sm border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full text-sm border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white [color-scheme:dark]' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                   placeholder="End Date"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
                 <DollarSign className="w-4 h-4 inline mr-1" />
                 Amount Range
               </label>
@@ -201,14 +226,22 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
                   type="number"
                   value={filters.amountRange.min}
                   onChange={(e) => handleFilterChange('amountRange', { ...filters.amountRange, min: e.target.value })}
-                  className="w-full text-sm border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full text-sm border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                   placeholder="Min Amount"
                 />
                 <input
                   type="number"
                   value={filters.amountRange.max}
                   onChange={(e) => handleFilterChange('amountRange', { ...filters.amountRange, max: e.target.value })}
-                  className="w-full text-sm border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full text-sm border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                   placeholder="Max Amount"
                 />
               </div>
@@ -216,7 +249,7 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">KYC Status</label>
+            <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>KYC Status</label>
             <div className="flex items-center space-x-4">
               {filterOptions.kycStatuses.map(status => (
                 <label key={status} className="flex items-center">
@@ -226,7 +259,7 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
                     onChange={() => handleMultiSelectChange('kycStatus', status)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="ml-2 text-sm text-gray-700">{status}</span>
+                  <span className={`ml-2 text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{status}</span>
                 </label>
               ))}
             </div>
@@ -235,9 +268,9 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
       )}
 
       {hasActiveFilters && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className={`mt-4 pt-4 border-t ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="flex items-center space-x-2 flex-wrap">
-            <span className="text-sm text-gray-600">Active filters:</span>
+            <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>Active filters:</span>
 
             {searchTerm && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

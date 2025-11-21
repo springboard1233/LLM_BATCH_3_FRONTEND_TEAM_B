@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import SettingsPanel from './src/components/SettingsPanel'
 import { useTranslation } from './src/hooks/useTranslation'
+import { useSettings } from './src/contexts/SettingsContext'
 
 export default function DashboardHeader({
   onRefresh,
@@ -21,10 +22,10 @@ export default function DashboardHeader({
   transactions = [],
   onBackToLanding,
   rightContent, // ✅ Merged new prop
-  user,
-  onLogout,
 }) {
   const { t } = useTranslation();
+  const { effectiveTheme } = useSettings();
+  const isDarkTheme = effectiveTheme === 'dark';
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -118,12 +119,16 @@ export default function DashboardHeader({
   }, [showNotifications]);
 
   return (
-    <header className="bg-black/20 backdrop-blur-md border-b border-white/10 px-6 py-4 relative z-10">
+    <header className={`px-6 py-4 relative z-10 border-b ${
+      isDarkTheme 
+        ? 'bg-black/20 backdrop-blur-md border-white/10' 
+        : 'bg-white border-gray-200 shadow-sm'
+    }`}>
       <div className="flex items-center justify-between">
         {/* Left Section */}
         <div className="flex items-center space-x-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">{t("app.title")}</h1>
+            <h1 className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{t("app.title")}</h1>
             <div className="flex items-center space-x-4 mt-1">
               <div className="flex items-center space-x-2">
                 {isOnline ? (
@@ -139,7 +144,7 @@ export default function DashboardHeader({
                   {isOnline ? t("app.connected") : t("app.offline")}
                 </span>
               </div>
-              <div className="text-sm text-gray-300">
+              <div className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
                 {t("app.lastUpdated")}:{" "}
                 {lastUpdated
                   ? new Date(lastUpdated).toLocaleTimeString()
@@ -152,7 +157,7 @@ export default function DashboardHeader({
         {/* Right Section */}
         <div className="flex items-center gap-4">
           {/* Clock */}
-          <div className="text-sm text-gray-300">
+          <div className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
             {currentTime.toLocaleString()}
           </div>
 
@@ -160,7 +165,11 @@ export default function DashboardHeader({
           {onBackToLanding && (
             <button
               onClick={onBackToLanding}
-              className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-300 bg-white/10 backdrop-blur-sm rounded-lg hover:bg-white/20 transition-colors border border-white/10"
+              className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors border ${
+                isDarkTheme 
+                  ? 'text-gray-300 bg-white/10 backdrop-blur-sm hover:bg-white/20 border-white/10' 
+                  : 'text-gray-700 bg-gray-100 hover:bg-gray-200 border-gray-300'
+              }`}
             >
               <Home className="w-4 h-4" />
               <span>{t("app.home")}</span>
@@ -170,10 +179,12 @@ export default function DashboardHeader({
           {/* Refresh */}
           <button
             onClick={onRefresh}
-            className="p-2 hover:bg-white/5 rounded-lg transition-colors"
+            className={`p-2 rounded-lg transition-colors ${
+              isDarkTheme ? 'hover:bg-white/5' : 'hover:bg-gray-100'
+            }`}
             title="Refresh"
           >
-            <RefreshCw className="w-5 h-5 text-gray-300" />
+            <RefreshCw className={`w-5 h-5 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`} />
           </button>
 
           {/* ✅ Insert rightContent (LiveToggle, etc.) */}
@@ -182,37 +193,24 @@ export default function DashboardHeader({
           {/* Settings */}
           <button
             onClick={() => setShowSettings(true)}
-            className="p-2 text-gray-300 hover:text-white transition-colors"
+            className={`p-2 transition-colors ${
+              isDarkTheme ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+            }`}
             title="Open settings"
           >
             <Settings className="w-5 h-5" />
           </button>
 
           {/* User */}
-          <div className="relative group">
-            <div className="flex items-center space-x-2 px-3 py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/10 cursor-pointer">
-              <User className="w-4 h-4 text-emerald-400" />
-              <span className="text-sm font-medium text-white">
-                {user?.name || t("app.adminUser")}
-              </span>
-            </div>
-            
-            {/* Dropdown Menu */}
-            <div className="absolute right-0 mt-2 w-48 bg-black/90 backdrop-blur-md rounded-lg shadow-xl border border-white/20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-              <div className="p-3 border-b border-white/10">
-                <p className="text-sm font-medium text-white">{user?.name}</p>
-                <p className="text-xs text-gray-400">{user?.email}</p>
-                <p className="text-xs text-emerald-400 mt-1">{user?.role}</p>
-              </div>
-              <div className="p-2">
-                <button
-                  onClick={onLogout}
-                  className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
+          <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg border ${
+            isDarkTheme 
+              ? 'bg-white/10 backdrop-blur-sm border-white/10' 
+              : 'bg-gray-100 border-gray-300'
+          }`}>
+            <User className="w-4 h-4 text-emerald-400" />
+            <span className={`text-sm font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+              {t("app.adminUser")}
+            </span>
           </div>
         </div>
       </div>

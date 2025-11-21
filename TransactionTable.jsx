@@ -1,7 +1,10 @@
 import { useState, useMemo } from 'react'
 import { ChevronUp, ChevronDown, Search, Download, Eye } from 'lucide-react'
+import { useSettings } from './src/contexts/SettingsContext'
 
 export default function TransactionTable({ transactions = [], isLoading = false, error = null }) {
+  const { effectiveTheme } = useSettings();
+  const isDarkTheme = effectiveTheme === 'dark';
   const [sortField, setSortField] = useState('date')
   const [sortDirection, setSortDirection] = useState('desc')
   const [currentPage, setCurrentPage] = useState(1)
@@ -103,10 +106,12 @@ export default function TransactionTable({ transactions = [], isLoading = false,
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-      <div className="px-6 py-4 border-b border-gray-200">
+    <div className={`rounded-xl shadow-sm border ${
+      isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+    }`}>
+      <div className={`px-6 py-4 border-b ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'}`}>
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Transaction Details</h3>
+          <h3 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Transaction Details</h3>
           <div className="flex items-center space-x-3">
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -115,10 +120,18 @@ export default function TransactionTable({ transactions = [], isLoading = false,
                 placeholder="Search transactions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  isDarkTheme 
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
               />
             </div>
-            <button className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            <button className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              isDarkTheme 
+                ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' 
+                : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+            }`}>
               <Download className="w-4 h-4" />
               <span>Export</span>
             </button>
@@ -128,10 +141,14 @@ export default function TransactionTable({ transactions = [], isLoading = false,
 
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className={isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}>
             <tr>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer ${
+                  isDarkTheme 
+                    ? 'text-gray-300 hover:bg-gray-600' 
+                    : 'text-gray-500 hover:bg-gray-100'
+                }`}
                 onClick={() => handleSort('id')}
               >
                 <div className="flex items-center space-x-1">
@@ -140,7 +157,11 @@ export default function TransactionTable({ transactions = [], isLoading = false,
                 </div>
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer ${
+                  isDarkTheme 
+                    ? 'text-gray-300 hover:bg-gray-600' 
+                    : 'text-gray-500 hover:bg-gray-100'
+                }`}
                 onClick={() => handleSort('customerId')}
               >
                 <div className="flex items-center space-x-1">
@@ -149,7 +170,11 @@ export default function TransactionTable({ transactions = [], isLoading = false,
                 </div>
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer ${
+                  isDarkTheme 
+                    ? 'text-gray-300 hover:bg-gray-600' 
+                    : 'text-gray-500 hover:bg-gray-100'
+                }`}
                 onClick={() => handleSort('date')}
               >
                 <div className="flex items-center space-x-1">
@@ -158,7 +183,11 @@ export default function TransactionTable({ transactions = [], isLoading = false,
                 </div>
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer ${
+                  isDarkTheme 
+                    ? 'text-gray-300 hover:bg-gray-600' 
+                    : 'text-gray-500 hover:bg-gray-100'
+                }`}
                 onClick={() => handleSort('channel')}
               >
                 <div className="flex items-center space-x-1">
@@ -167,7 +196,11 @@ export default function TransactionTable({ transactions = [], isLoading = false,
                 </div>
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer ${
+                  isDarkTheme 
+                    ? 'text-gray-300 hover:bg-gray-600' 
+                    : 'text-gray-500 hover:bg-gray-100'
+                }`}
                 onClick={() => handleSort('amount')}
               >
                 <div className="flex items-center space-x-1">
@@ -175,11 +208,17 @@ export default function TransactionTable({ transactions = [], isLoading = false,
                   <SortIcon field="amount" />
                 </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                isDarkTheme ? 'text-gray-300' : 'text-gray-500'
+              }`}>
                 KYC Status
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer ${
+                  isDarkTheme 
+                    ? 'text-gray-300 hover:bg-gray-600' 
+                    : 'text-gray-500 hover:bg-gray-100'
+                }`}
                 onClick={() => handleSort('status')}
               >
                 <div className="flex items-center space-x-1">
@@ -187,43 +226,49 @@ export default function TransactionTable({ transactions = [], isLoading = false,
                   <SortIcon field="status" />
                 </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                isDarkTheme ? 'text-gray-300' : 'text-gray-500'
+              }`}>
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className={`divide-y ${
+            isDarkTheme 
+              ? 'bg-gray-800 divide-gray-700' 
+              : 'bg-white divide-gray-200'
+          }`}>
             {isLoading ? (
               <tr>
                 <td colSpan="8" className="px-6 py-12 text-center">
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <span className="ml-2 text-gray-600">Loading transactions...</span>
+                    <span className={`ml-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>Loading transactions...</span>
                   </div>
                 </td>
               </tr>
             ) : paginatedTransactions.length === 0 ? (
               <tr>
-                <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
+                <td colSpan="8" className={`px-6 py-12 text-center ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
                   No transactions found
                 </td>
               </tr>
             ) : (
               paginatedTransactions.map((transaction, index) => (
-                <tr key={transaction.id || index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <tr key={transaction.id || index} className={isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
+                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
                     {transaction.id || 'N/A'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
                     {transaction.customerId || transaction.customer_id || 'N/A'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
                     {transaction.date ? new Date(transaction.date).toLocaleDateString() : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getChannelBadge(transaction.channel)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
                     ${Number(transaction.amount || 0).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -250,23 +295,29 @@ export default function TransactionTable({ transactions = [], isLoading = false,
       </div>
 
       {processedTransactions.length > 0 && (
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+        <div className={`px-6 py-4 border-t flex items-center justify-between ${
+          isDarkTheme ? 'border-gray-700' : 'border-gray-200'
+        }`}>
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-700">Show</span>
+            <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Show</span>
             <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value))
                 setCurrentPage(1)
               }}
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
+              className={`border rounded px-2 py-1 text-sm ${
+                isDarkTheme 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span className="text-sm text-gray-700">
+            <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
               of {processedTransactions.length} transactions
             </span>
           </div>
@@ -275,17 +326,25 @@ export default function TransactionTable({ transactions = [], isLoading = false,
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed ${
+                isDarkTheme 
+                  ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
             >
               Previous
             </button>
-            <span className="text-sm text-gray-700">
+            <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed ${
+                isDarkTheme 
+                  ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
             >
               Next
             </button>

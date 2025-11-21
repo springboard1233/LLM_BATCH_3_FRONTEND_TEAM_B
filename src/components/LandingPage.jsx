@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Eye, Lock, Cpu, Database, AlertTriangle, TrendingUp, CheckCircle, ArrowRight, Play, Pause, BarChart3, Activity, Layers, Zap, Brain, Users, Clock } from 'lucide-react';
+import { useSettings } from '../contexts/SettingsContext';
 
 const LandingPage = ({ onGetStarted }) => {
+  const { effectiveTheme } = useSettings();
+  const isDarkTheme = effectiveTheme === 'dark';
   const [isAnimating, setIsAnimating] = useState(true);
   const [currentStat, setCurrentStat] = useState(0);
   const [activeFeature, setActiveFeature] = useState(0);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
 
   // Smooth scroll function
   const scrollToSection = (sectionId) => {
@@ -66,18 +71,30 @@ const LandingPage = ({ onGetStarted }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 relative overflow-hidden">
+    <div className={`min-h-screen relative overflow-hidden ${
+      isDarkTheme 
+        ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+    }`}>
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-emerald-500/5 to-blue-500/5 rounded-full blur-3xl"></div>
+        <div className={`absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl animate-pulse ${
+          isDarkTheme ? 'bg-blue-500/10' : 'bg-blue-500/20'
+        }`}></div>
+        <div className={`absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl animate-pulse delay-1000 ${
+          isDarkTheme ? 'bg-purple-500/10' : 'bg-purple-500/20'
+        }`}></div>
+        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl ${
+          isDarkTheme ? 'bg-gradient-to-r from-emerald-500/5 to-blue-500/5' : 'bg-gradient-to-r from-emerald-500/10 to-blue-500/10'
+        }`}></div>
         
         {/* Floating particles */}
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-2 h-2 bg-white/20 rounded-full animate-bounce"
+            className={`absolute w-2 h-2 rounded-full animate-bounce ${
+              isDarkTheme ? 'bg-white/20' : 'bg-blue-500/30'
+            }`}
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -89,41 +106,69 @@ const LandingPage = ({ onGetStarted }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-8 py-6 bg-black/20 backdrop-blur-md border-b border-white/10">
+      <nav className={`relative z-10 flex items-center justify-between px-8 py-6 border-b ${
+        isDarkTheme 
+          ? 'bg-black/20 backdrop-blur-md border-white/10' 
+          : 'bg-white border-gray-200 shadow-sm'
+      }`}>
         <div className="flex items-center space-x-3">
           <div className="relative">
             <Shield className="h-10 w-10 text-emerald-400" />
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full animate-ping"></div>
           </div>
           <div>
-            <span className="text-2xl font-bold text-white">SecureGuard</span>
+            <span className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>SecureGuard</span>
             <div className="text-xs text-emerald-400 font-medium">AI Fraud Detection</div>
           </div>
         </div>
         <div className="flex items-center space-x-6">
           <button 
             onClick={() => scrollToSection('features')}
-            className="text-gray-300 hover:text-white transition-colors font-medium"
+            className={`font-medium transition-colors ${
+              isDarkTheme ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+            }`}
           >
             Features
           </button>
           <button 
             onClick={() => scrollToSection('solutions')}
-            className="text-gray-300 hover:text-white transition-colors font-medium"
+            className={`font-medium transition-colors ${
+              isDarkTheme ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+            }`}
           >
             Solutions
           </button>
           <button 
             onClick={() => scrollToSection('pricing')}
-            className="text-gray-300 hover:text-white transition-colors font-medium"
+            className={`font-medium transition-colors ${
+              isDarkTheme ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+            }`}
           >
             Pricing
+          </button>
+          <button 
+            onClick={() => setShowLogin(true)}
+            className={`font-medium transition-colors ${
+              isDarkTheme ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+            }`}
+          >
+            Login
+          </button>
+          <button 
+            onClick={() => setShowSignup(true)}
+            className={`px-4 py-2 border-2 rounded-full font-semibold transition-all duration-300 ${
+              isDarkTheme 
+                ? 'border-emerald-500 text-emerald-400 hover:bg-emerald-500/10' 
+                : 'border-emerald-600 text-emerald-600 hover:bg-emerald-50'
+            }`}
+          >
+            Sign Up
           </button>
           <button 
             onClick={onGetStarted}
             className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-full hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-emerald-500/25 font-semibold"
           >
-            Launch Dashboard
+            Guest Access
           </button>
         </div>
       </nav>
@@ -132,13 +177,17 @@ const LandingPage = ({ onGetStarted }) => {
       <section className="relative z-10 px-8 py-20 text-center">
         <div className="max-w-6xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 border border-emerald-500/30 rounded-full text-emerald-300 text-sm mb-8 backdrop-blur-sm">
+          <div className={`inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 border border-emerald-500/30 rounded-full text-sm mb-8 backdrop-blur-sm ${
+            isDarkTheme ? 'text-emerald-300' : 'text-emerald-700'
+          }`}>
             <Zap className="h-4 w-4 mr-2 animate-pulse" />
             Next-Generation AI Protection
           </div>
           
           {/* Main Heading */}
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-8 leading-tight">
+          <h1 className={`text-6xl md:text-7xl font-bold mb-8 leading-tight ${
+            isDarkTheme ? 'text-white' : 'text-gray-900'
+          }`}>
             Stop Fraud
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 animate-pulse">
@@ -147,7 +196,9 @@ const LandingPage = ({ onGetStarted }) => {
           </h1>
           
           {/* Subheading */}
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className={`text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed ${
+            isDarkTheme ? 'text-gray-300' : 'text-gray-700'
+          }`}>
             Harness the power of artificial intelligence to detect, prevent, and eliminate fraud 
             with unprecedented accuracy and speed.
           </p>
@@ -161,7 +212,11 @@ const LandingPage = ({ onGetStarted }) => {
               Start Protecting Now
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="px-8 py-4 border-2 border-white/20 text-white rounded-full text-lg font-semibold hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+            <button className={`px-8 py-4 border-2 rounded-full text-lg font-semibold transition-all duration-300 ${
+              isDarkTheme 
+                ? 'border-white/20 text-white hover:bg-white/10 backdrop-blur-sm' 
+                : 'border-gray-300 text-gray-900 hover:bg-gray-100'
+            }`}>
               Watch Demo
             </button>
           </div>
@@ -171,7 +226,11 @@ const LandingPage = ({ onGetStarted }) => {
             {stats.map((stat, index) => (
               <div 
                 key={index}
-                className={`text-center p-6 rounded-2xl bg-black/20 backdrop-blur-sm border border-white/10 transition-all duration-500 ${
+                className={`text-center p-6 rounded-2xl border transition-all duration-500 ${
+                  isDarkTheme 
+                    ? 'bg-black/20 backdrop-blur-sm border-white/10' 
+                    : 'bg-white border-gray-200 shadow-md'
+                } ${
                   currentStat === index ? 'scale-105 border-emerald-500/50 shadow-lg shadow-emerald-500/20' : ''
                 }`}
               >
@@ -186,14 +245,16 @@ const LandingPage = ({ onGetStarted }) => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="relative z-10 px-8 py-20 bg-black/10 backdrop-blur-sm">
+      <section id="features" className={`relative z-10 px-8 py-20 ${
+        isDarkTheme ? 'bg-black/10 backdrop-blur-sm' : 'bg-gray-50'
+      }`}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className={`text-4xl md:text-5xl font-bold mb-6 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
               Intelligent Protection
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400"> Ecosystem</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className={`text-xl max-w-3xl mx-auto ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
               Our AI-powered platform combines multiple detection methods to create an impenetrable shield against fraud
             </p>
           </div>
@@ -205,9 +266,13 @@ const LandingPage = ({ onGetStarted }) => {
                 <div 
                   key={index}
                   className={`p-6 rounded-2xl border transition-all duration-500 cursor-pointer ${
-                    activeFeature === index 
-                      ? 'bg-white/10 border-white/30 shadow-xl' 
-                      : 'bg-black/20 border-white/10 hover:bg-white/5'
+                    isDarkTheme 
+                      ? activeFeature === index 
+                        ? 'bg-white/10 border-white/30 shadow-xl' 
+                        : 'bg-black/20 border-white/10 hover:bg-white/5'
+                      : activeFeature === index
+                        ? 'bg-emerald-50 border-emerald-300 shadow-xl'
+                        : 'bg-white border-gray-200 hover:bg-gray-50 shadow-md'
                   }`}
                   onClick={() => setActiveFeature(index)}
                 >
@@ -216,8 +281,8 @@ const LandingPage = ({ onGetStarted }) => {
                       {feature.icon}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
-                      <p className="text-gray-300 leading-relaxed">{feature.description}</p>
+                      <h3 className={`text-xl font-semibold mb-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{feature.title}</h3>
+                      <p className={`leading-relaxed ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{feature.description}</p>
                     </div>
                   </div>
                 </div>
@@ -226,10 +291,14 @@ const LandingPage = ({ onGetStarted }) => {
             
             {/* Interactive Visualization */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
+              <div className={`rounded-3xl p-8 border ${
+                isDarkTheme 
+                  ? 'bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm border-white/10' 
+                  : 'bg-white border-gray-200 shadow-lg'
+              }`}>
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-2">Live Threat Detection</h3>
-                  <p className="text-gray-400">Real-time fraud analysis in action</p>
+                  <h3 className={`text-2xl font-bold mb-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Live Threat Detection</h3>
+                  <p className={isDarkTheme ? 'text-gray-400' : 'text-gray-600'}>Real-time fraud analysis in action</p>
                 </div>
                 
                 {/* Mock Dashboard */}
@@ -276,21 +345,27 @@ const LandingPage = ({ onGetStarted }) => {
       </section>
 
       {/* Solutions Section */}
-      <section id="solutions" className="relative z-10 px-8 py-20 bg-black/5 backdrop-blur-sm">
+      <section id="solutions" className={`relative z-10 px-8 py-20 ${
+        isDarkTheme ? 'bg-black/5 backdrop-blur-sm' : 'bg-white'
+      }`}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className={`text-4xl md:text-5xl font-bold mb-6 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
               Complete Fraud
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400"> Solutions</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className={`text-xl max-w-3xl mx-auto ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
               Tailored solutions for every industry and business size
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
             {/* Banking & Finance */}
-            <div className="p-8 bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-blue-500/30 transition-all duration-300">
+            <div className={`p-8 rounded-3xl border transition-all duration-300 ${
+              isDarkTheme 
+                ? 'bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-sm border-white/10 hover:border-blue-500/30' 
+                : 'bg-gradient-to-br from-blue-50 to-purple-50 border-gray-200 hover:border-blue-300 shadow-md'
+            }`}>
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mb-6">
                 <Database className="w-8 h-8 text-white" />
               </div>
@@ -315,7 +390,11 @@ const LandingPage = ({ onGetStarted }) => {
             </div>
 
             {/* E-commerce */}
-            <div className="p-8 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-emerald-500/30 transition-all duration-300">
+            <div className={`p-8 rounded-3xl border transition-all duration-300 ${
+              isDarkTheme 
+                ? 'bg-gradient-to-br from-emerald-500/10 to-teal-500/10 backdrop-blur-sm border-white/10 hover:border-emerald-500/30' 
+                : 'bg-gradient-to-br from-emerald-50 to-teal-50 border-gray-200 hover:border-emerald-300 shadow-md'
+            }`}>
               <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6">
                 <TrendingUp className="w-8 h-8 text-white" />
               </div>
@@ -340,7 +419,11 @@ const LandingPage = ({ onGetStarted }) => {
             </div>
 
             {/* Enterprise */}
-            <div className="p-8 bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-orange-500/30 transition-all duration-300">
+            <div className={`p-8 rounded-3xl border transition-all duration-300 ${
+              isDarkTheme 
+                ? 'bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-sm border-white/10 hover:border-orange-500/30' 
+                : 'bg-gradient-to-br from-orange-50 to-red-50 border-gray-200 hover:border-orange-300 shadow-md'
+            }`}>
               <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mb-6">
                 <Layers className="w-8 h-8 text-white" />
               </div>
@@ -453,7 +536,11 @@ const LandingPage = ({ onGetStarted }) => {
             </div>
 
             {/* Enterprise Plan */}
-            <div className="p-8 bg-black/20 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className={`p-8 rounded-3xl border transition-all duration-300 ${
+              isDarkTheme 
+                ? 'bg-black/20 backdrop-blur-sm border-white/10 hover:border-white/20' 
+                : 'bg-white border-gray-200 hover:border-gray-300 shadow-md'
+            }`}>
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
                 <p className="text-gray-400 mb-6">For large organizations</p>
@@ -501,22 +588,28 @@ const LandingPage = ({ onGetStarted }) => {
           </p>
           
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="p-6 bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10">
+            <div className={`p-6 rounded-2xl border ${
+              isDarkTheme ? 'bg-black/20 backdrop-blur-sm border-white/10' : 'bg-white border-gray-200 shadow-md'
+            }`}>
               <Database className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Enterprise Scale</h3>
-              <p className="text-gray-300">Process millions of transactions per second with 99.99% uptime</p>
+              <h3 className={`text-xl font-semibold mb-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Enterprise Scale</h3>
+              <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>Process millions of transactions per second with 99.99% uptime</p>
             </div>
             
-            <div className="p-6 bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10">
+            <div className={`p-6 rounded-2xl border ${
+              isDarkTheme ? 'bg-black/20 backdrop-blur-sm border-white/10' : 'bg-white border-gray-200 shadow-md'
+            }`}>
               <Layers className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Easy Integration</h3>
-              <p className="text-gray-300">Deploy in minutes with our comprehensive API and SDK suite</p>
+              <h3 className={`text-xl font-semibold mb-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Easy Integration</h3>
+              <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>Deploy in minutes with our comprehensive API and SDK suite</p>
             </div>
             
-            <div className="p-6 bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10">
+            <div className={`p-6 rounded-2xl border ${
+              isDarkTheme ? 'bg-black/20 backdrop-blur-sm border-white/10' : 'bg-white border-gray-200 shadow-md'
+            }`}>
               <Users className="w-12 h-12 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">24/7 Support</h3>
-              <p className="text-gray-300">Expert support team available around the clock for your peace of mind</p>
+              <h3 className={`text-xl font-semibold mb-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>24/7 Support</h3>
+              <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>Expert support team available around the clock for your peace of mind</p>
             </div>
           </div>
         </div>
@@ -525,11 +618,15 @@ const LandingPage = ({ onGetStarted }) => {
       {/* Final CTA */}
       <section className="relative z-10 px-8 py-20">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-r from-emerald-600/20 to-blue-600/20 backdrop-blur-sm rounded-3xl p-12 text-center border border-white/20">
-            <h2 className="text-4xl font-bold text-white mb-6">
+          <div className={`rounded-3xl p-12 text-center border ${
+            isDarkTheme 
+              ? 'bg-gradient-to-r from-emerald-600/20 to-blue-600/20 backdrop-blur-sm border-white/20' 
+              : 'bg-gradient-to-r from-emerald-50 to-blue-50 border-gray-200 shadow-lg'
+          }`}>
+            <h2 className={`text-4xl font-bold mb-6 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
               Ready to Eliminate Fraud?
             </h2>
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className={`text-xl mb-8 max-w-2xl mx-auto ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
               Start your journey to bulletproof fraud protection. Deploy our AI-powered solution in minutes.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -540,7 +637,11 @@ const LandingPage = ({ onGetStarted }) => {
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </button>
-              <button className="px-8 py-4 border-2 border-white/30 text-white rounded-full text-lg font-semibold hover:bg-white/10 transition-all duration-300">
+              <button className={`px-8 py-4 border-2 rounded-full text-lg font-semibold transition-all duration-300 ${
+                isDarkTheme 
+                  ? 'border-white/30 text-white hover:bg-white/10' 
+                  : 'border-gray-300 text-gray-900 hover:bg-gray-100'
+              }`}>
                 Schedule Demo
               </button>
             </div>
@@ -548,46 +649,206 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
       </section>
 
+      {/* Login Modal */}
+      {showLogin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl p-8 ${
+            isDarkTheme ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+          }`}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Login</h2>
+              <button 
+                onClick={() => setShowLogin(false)}
+                className={`p-2 rounded-lg transition-colors ${
+                  isDarkTheme ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
+                }`}
+              >
+                ✕
+              </button>
+            </div>
+            <form className="space-y-4">
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-lg hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 font-semibold"
+              >
+                Login
+              </button>
+              <p className={`text-center text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                Don't have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLogin(false);
+                    setShowSignup(true);
+                  }}
+                  className="text-emerald-500 hover:text-emerald-600 font-medium"
+                >
+                  Sign up
+                </button>
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Signup Modal */}
+      {showSignup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl p-8 ${
+            isDarkTheme ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+          }`}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Sign Up</h2>
+              <button 
+                onClick={() => setShowSignup(false)}
+                className={`p-2 rounded-lg transition-colors ${
+                  isDarkTheme ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
+                }`}
+              >
+                ✕
+              </button>
+            </div>
+            <form className="space-y-4">
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter your name"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Create a password"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-lg hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 font-semibold"
+              >
+                Create Account
+              </button>
+              <p className={`text-center text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSignup(false);
+                    setShowLogin(true);
+                  }}
+                  className="text-emerald-500 hover:text-emerald-600 font-medium"
+                >
+                  Login
+                </button>
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
-      <footer className="relative z-10 px-8 py-12 bg-black/30 backdrop-blur-sm border-t border-white/10">
+      <footer className={`relative z-10 px-8 py-12 border-t ${
+        isDarkTheme 
+          ? 'bg-black/30 backdrop-blur-sm border-white/10' 
+          : 'bg-gray-100 border-gray-200'
+      }`}>
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="col-span-2">
               <div className="flex items-center space-x-3 mb-4">
                 <Shield className="h-8 w-8 text-emerald-400" />
                 <div>
-                  <span className="text-xl font-bold text-white">SecureGuard</span>
+                  <span className={`text-xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>SecureGuard</span>
                   <div className="text-xs text-emerald-400">AI Fraud Detection</div>
                 </div>
               </div>
-              <p className="text-gray-400 max-w-md">
+              <p className={`max-w-md ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                 Advanced artificial intelligence platform designed to protect your business from fraud 
                 with unmatched accuracy and real-time response capabilities.
               </p>
             </div>
             
             <div>
-              <h4 className="text-white font-semibold mb-4">Platform</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API Documentation</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Integrations</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
+              <h4 className={`font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Platform</h4>
+              <ul className={`space-y-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                <li><a href="#" className={`transition-colors ${isDarkTheme ? 'hover:text-white' : 'hover:text-gray-900'}`}>Features</a></li>
+                <li><a href="#" className={`transition-colors ${isDarkTheme ? 'hover:text-white' : 'hover:text-gray-900'}`}>API Documentation</a></li>
+                <li><a href="#" className={`transition-colors ${isDarkTheme ? 'hover:text-white' : 'hover:text-gray-900'}`}>Integrations</a></li>
+                <li><a href="#" className={`transition-colors ${isDarkTheme ? 'hover:text-white' : 'hover:text-gray-900'}`}>Security</a></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-white font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+              <h4 className={`font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Company</h4>
+              <ul className={`space-y-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                <li><a href="#" className={`transition-colors ${isDarkTheme ? 'hover:text-white' : 'hover:text-gray-900'}`}>About Us</a></li>
+                <li><a href="#" className={`transition-colors ${isDarkTheme ? 'hover:text-white' : 'hover:text-gray-900'}`}>Careers</a></li>
+                <li><a href="#" className={`transition-colors ${isDarkTheme ? 'hover:text-white' : 'hover:text-gray-900'}`}>Contact</a></li>
+                <li><a href="#" className={`transition-colors ${isDarkTheme ? 'hover:text-white' : 'hover:text-gray-900'}`}>Privacy Policy</a></li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-white/10 mt-8 pt-8 text-center text-gray-400">
+          <div className={`border-t mt-8 pt-8 text-center ${
+            isDarkTheme ? 'border-white/10 text-gray-400' : 'border-gray-200 text-gray-600'
+          }`}>
             <p>&copy; 2024 SecureGuard AI. All rights reserved. Protecting businesses worldwide.</p>
           </div>
         </div>

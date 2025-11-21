@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, RefreshCw, Send } from 'lucide-react';
 import { apiService } from './src/services/api';
+import { useSettings } from './src/contexts/SettingsContext';
 
 const DEFAULT_PAYLOAD = {
   customer_id: 'LLM1',
@@ -19,6 +20,8 @@ const channels = [
 ];
 
 const FraudDetection = () => {
+  const { effectiveTheme } = useSettings();
+  const isDarkTheme = effectiveTheme === 'dark';
   const [formData, setFormData] = useState(DEFAULT_PAYLOAD);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -64,11 +67,15 @@ const FraudDetection = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-black/30 border border-white/10 rounded-2xl p-6 backdrop-blur-lg">
+      <div className={`rounded-2xl p-6 border ${
+        isDarkTheme 
+          ? 'bg-black/30 border-white/10 backdrop-blur-lg' 
+          : 'bg-white border-gray-200 shadow-sm'
+      }`}>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-semibold text-white">Fraud Detection Simulator</h3>
-            <p className="text-gray-300 mt-1">
+            <h3 className={`text-2xl font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Fraud Detection Simulator</h3>
+            <p className={`mt-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
               Submit a single transaction payload to evaluate its fraud risk score using the hybrid ML + rules engine.
             </p>
           </div>
@@ -77,46 +84,62 @@ const FraudDetection = () => {
         <form className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label className="text-sm text-gray-300 block mb-1">Customer ID</label>
+              <label className={`text-sm block mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Customer ID</label>
               <input
                 type="text"
                 value={formData.customer_id}
                 onChange={(e) => handleChange('customer_id', e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className={`w-full rounded-lg px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                  isDarkTheme 
+                    ? 'bg-black/20 border-white/10 text-white' 
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 required
               />
             </div>
             <div>
-              <label className="text-sm text-gray-300 block mb-1">KYC Verified</label>
+              <label className={`text-sm block mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>KYC Verified</label>
               <select
                 value={Number(formData.kyc_verified)}
                 onChange={(e) => handleChange('kyc_verified', Number(e.target.value))}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className={`w-full rounded-lg px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                  isDarkTheme 
+                    ? 'bg-black/20 border-white/10 text-white' 
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
               >
                 <option value={1}>Yes (1)</option>
                 <option value={0}>No (0)</option>
               </select>
             </div>
             <div>
-              <label className="text-sm text-gray-300 block mb-1">Account Age (days)</label>
+              <label className={`text-sm block mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Account Age (days)</label>
               <input
                 type="number"
                 min="0"
                 value={formData.account_age_days}
                 onChange={(e) => handleChange('account_age_days', e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className={`w-full rounded-lg px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                  isDarkTheme 
+                    ? 'bg-black/20 border-white/10 text-white' 
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 required
               />
             </div>
             <div>
-              <label className="text-sm text-gray-300 block mb-1">Transaction Amount</label>
+              <label className={`text-sm block mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Transaction Amount</label>
               <input
                 type="number"
                 min="0"
                 step="0.01"
                 value={formData.transaction_amount}
                 onChange={(e) => handleChange('transaction_amount', e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className={`w-full rounded-lg px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                  isDarkTheme 
+                    ? 'bg-black/20 border-white/10 text-white' 
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 required
               />
             </div>
@@ -124,11 +147,15 @@ const FraudDetection = () => {
 
           <div className="space-y-4">
             <div>
-              <label className="text-sm text-gray-300 block mb-1">Channel</label>
+              <label className={`text-sm block mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Channel</label>
               <select
                 value={formData.channel}
                 onChange={(e) => handleChange('channel', e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className={`w-full rounded-lg px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                  isDarkTheme 
+                    ? 'bg-black/20 border-white/10 text-white' 
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
               >
                 {channels.map((channel) => (
                   <option key={channel.value} value={channel.value}>
@@ -138,7 +165,7 @@ const FraudDetection = () => {
               </select>
             </div>
             <div>
-              <label className="text-sm text-gray-300 block mb-1">Timestamp</label>
+              <label className={`text-sm block mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Timestamp</label>
               <input
                 type="datetime-local"
                 value={formData.timestamp.replace(' ', 'T')}
@@ -147,7 +174,11 @@ const FraudDetection = () => {
                   const normalized = rawValue.length === 16 ? `${rawValue}:00` : rawValue;
                   handleChange('timestamp', normalized);
                 }}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className={`w-full rounded-lg px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                  isDarkTheme 
+                    ? 'bg-black/20 border-white/10 text-white [color-scheme:dark]' 
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 required
               />
             </div>
@@ -164,7 +195,11 @@ const FraudDetection = () => {
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center space-x-2 border border-white/20 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition"
+                className={`inline-flex items-center space-x-2 border px-4 py-2 rounded-lg transition ${
+                  isDarkTheme 
+                    ? 'border-white/20 text-white hover:bg-white/10' 
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>Reset to Sample</span>
@@ -173,18 +208,26 @@ const FraudDetection = () => {
           </div>
         </form>
 
-        <div className="mt-6 text-sm text-gray-400">
+        <div className={`mt-6 text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
           <p>
             Expected payload format:
-            <span className="block font-mono text-xs text-gray-300 mt-2 bg-black/20 p-3 rounded-lg border border-white/5">
+            <span className={`block font-mono text-xs mt-2 p-3 rounded-lg border ${
+              isDarkTheme 
+                ? 'text-gray-300 bg-black/20 border-white/5' 
+                : 'text-gray-700 bg-gray-50 border-gray-200'
+            }`}>
               {JSON.stringify(DEFAULT_PAYLOAD, null, 2)}
             </span>
           </p>
         </div>
       </div>
 
-      <div className="bg-black/30 border border-white/10 rounded-2xl p-6 backdrop-blur-lg">
-        <h4 className="text-xl text-white font-semibold mb-4">Prediction Result</h4>
+      <div className={`rounded-2xl p-6 border ${
+        isDarkTheme 
+          ? 'bg-black/30 border-white/10 backdrop-blur-lg' 
+          : 'bg-white border-gray-200 shadow-sm'
+      }`}>
+        <h4 className={`text-xl font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Prediction Result</h4>
         {error && (
           <div className="text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
             {error}
@@ -193,8 +236,10 @@ const FraudDetection = () => {
         {result ? (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-black/40 border border-white/10 rounded-xl p-4">
-                <p className="text-sm text-gray-400">Final Verdict</p>
+              <div className={`rounded-xl p-4 border ${
+                isDarkTheme ? 'bg-black/40 border-white/10' : 'bg-gray-50 border-gray-200'
+              }`}>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Final Verdict</p>
                 <p
                   className={`text-2xl font-semibold mt-2 ${
                     result.is_fraud ? 'text-red-400' : 'text-emerald-400'
@@ -203,12 +248,14 @@ const FraudDetection = () => {
                   {result.is_fraud ? 'Fraudulent' : 'Legitimate'}
                 </p>
               </div>
-              <div className="bg-black/40 border border-white/10 rounded-xl p-4">
-                <p className="text-sm text-gray-400">Risk Score</p>
-                <p className="text-2xl font-semibold mt-2 text-white">
+              <div className={`rounded-xl p-4 border ${
+                isDarkTheme ? 'bg-black/40 border-white/10' : 'bg-gray-50 border-gray-200'
+              }`}>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Risk Score</p>
+                <p className={`text-2xl font-semibold mt-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
                   {(Number(result.risk_score || 0) * 100).toFixed(2)}%
                 </p>
-                <div className="w-full h-2 bg-white/10 rounded-full mt-3">
+                <div className={`w-full h-2 rounded-full mt-3 ${isDarkTheme ? 'bg-white/10' : 'bg-gray-200'}`}>
                   <div
                     className={`h-full rounded-full ${
                       result.is_fraud ? 'bg-red-500' : 'bg-emerald-500'
@@ -217,50 +264,58 @@ const FraudDetection = () => {
                   />
                 </div>
               </div>
-              <div className="bg-black/40 border border-white/10 rounded-xl p-4">
-                <p className="text-sm text-gray-400">ML Reason</p>
-                <p className="text-base text-white mt-2">
+              <div className={`rounded-xl p-4 border ${
+                isDarkTheme ? 'bg-black/40 border-white/10' : 'bg-gray-50 border-gray-200'
+              }`}>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>ML Reason</p>
+                <p className={`text-base mt-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
                   {result.ml_reason || 'No ML alerts triggered.'}
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-black/40 border border-white/10 rounded-xl p-4">
-                <p className="text-sm text-gray-400 mb-2">Rule Reasons</p>
+              <div className={`rounded-xl p-4 border ${
+                isDarkTheme ? 'bg-black/40 border-white/10' : 'bg-gray-50 border-gray-200'
+              }`}>
+                <p className={`text-sm mb-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Rule Reasons</p>
                 {result.rule_reasons && result.rule_reasons.length > 0 ? (
-                  <ul className="space-y-2 text-sm text-gray-200 list-disc list-inside">
+                  <ul className={`space-y-2 text-sm list-disc list-inside ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'}`}>
                     {result.rule_reasons.map((reason, idx) => (
                       <li key={`rule-${idx}`}>{reason}</li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-gray-400 text-sm">No rules were triggered.</p>
+                  <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>No rules were triggered.</p>
                 )}
               </div>
-              <div className="bg-black/40 border border-white/10 rounded-xl p-4">
-                <p className="text-sm text-gray-400 mb-2">Combined Reasons</p>
+              <div className={`rounded-xl p-4 border ${
+                isDarkTheme ? 'bg-black/40 border-white/10' : 'bg-gray-50 border-gray-200'
+              }`}>
+                <p className={`text-sm mb-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Combined Reasons</p>
                 {result.combined_reasons && result.combined_reasons.length > 0 ? (
-                  <ul className="space-y-2 text-sm text-gray-200 list-disc list-inside">
+                  <ul className={`space-y-2 text-sm list-disc list-inside ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'}`}>
                     {result.combined_reasons.map((reason, idx) => (
                       <li key={`combined-${idx}`}>{reason}</li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-gray-400 text-sm">No combined reasons available.</p>
+                  <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>No combined reasons available.</p>
                 )}
               </div>
             </div>
 
-            <div className="bg-black/40 border border-white/10 rounded-xl p-4">
-              <p className="text-sm text-gray-400 mb-2">Explanation</p>
-              <div className="text-gray-200 text-sm space-y-1 whitespace-pre-line">
+            <div className={`rounded-xl p-4 border ${
+              isDarkTheme ? 'bg-black/40 border-white/10' : 'bg-gray-50 border-gray-200'
+            }`}>
+              <p className={`text-sm mb-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Explanation</p>
+              <div className={`text-sm space-y-1 whitespace-pre-line ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'}`}>
                 {result.explanation || 'No explanation provided.'}
               </div>
             </div>
           </div>
         ) : (
-          <p className="text-gray-400">
+          <p className={isDarkTheme ? 'text-gray-400' : 'text-gray-600'}>
             Submit a payload to see the fraud decision, risk score, and explanation from the backend hybrid engine.
           </p>
         )}

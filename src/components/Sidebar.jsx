@@ -6,7 +6,8 @@ const navItems = [
   'Transaction Management',
   'Risk Analysis',
   'Activity Map',
-  'Export'
+  'Export',
+  'Settings'
 ]
 
 function Sidebar({ currentPage, setCurrentPage }) {

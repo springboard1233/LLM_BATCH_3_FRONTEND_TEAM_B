@@ -77,7 +77,7 @@ function ExportControls({
           <select
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value)}
-            className="w-full p-2 bg-black/20 border border-white/10 rounded-lg"
+            className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
           >
             <option value="CSV">CSV</option>
             <option value="JSON">JSON</option>
@@ -92,7 +92,7 @@ function ExportControls({
             type="date"
             value={startDate.toISOString().split('T')[0]}
             onChange={(e) => setStartDate(new Date(e.target.value))}
-            className="w-full p-2 bg-black/20 border border-white/10 rounded-lg"
+            className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
           />
         </div>
 
@@ -102,7 +102,7 @@ function ExportControls({
             type="date"
             value={endDate.toISOString().split('T')[0]}
             onChange={(e) => setEndDate(new Date(e.target.value))}
-            className="w-full p-2 bg-black/20 border border-white/10 rounded-lg"
+            className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
           />
         </div>
 

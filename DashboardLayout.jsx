@@ -4,9 +4,12 @@ import RiskLevelIndicator from './RiskLevelIndicator.jsx'
 import TransactionTable from './TransactionTable.jsx'
 import SearchFilterBar from './SearchFilterBar.jsx'
 import { useTranslation } from './src/hooks/useTranslation'
+import { useSettings } from './src/contexts/SettingsContext'
 
 export default function DashboardLayout({ transactions = [], isLoading = false, error = null }) {
   const { t } = useTranslation()
+  const { effectiveTheme } = useSettings();
+  const isDarkTheme = effectiveTheme === 'dark';
   const [filteredTransactions, setFilteredTransactions] = useState(transactions)
 
   // Handle filter changes from SearchFilterBar
@@ -98,19 +101,21 @@ export default function DashboardLayout({ transactions = [], isLoading = false, 
 
       {/* Summary Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6 hover:shadow-lg transition-shadow duration-200">
-          <h4 className="text-lg font-semibold text-white mb-2">{t('dashboard.filteredResults', 'Filtered Results')}</h4>
+        <div className={`rounded-xl border p-6 hover:shadow-lg transition-shadow duration-200 ${
+          isDarkTheme ? 'bg-black/20 backdrop-blur-sm border-white/10' : 'bg-white border-gray-200 shadow-md'
+        }`}>
+          <h4 className={`text-lg font-semibold mb-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{t('dashboard.filteredResults', 'Filtered Results')}</h4>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-300">{t('dashboard.totalTransactions', 'Total Transactions')}:</span>
-              <span className="text-sm font-medium text-white">{filteredTransactions.length}</span>
+              <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>{t('dashboard.totalTransactions', 'Total Transactions')}:</span>
+              <span className={`text-sm font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{filteredTransactions.length}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-300">{t('dashboard.originalDataset', 'Original Dataset')}:</span>
-              <span className="text-sm font-medium text-white">{transactions.length}</span>
+              <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>{t('dashboard.originalDataset', 'Original Dataset')}:</span>
+              <span className={`text-sm font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{transactions.length}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-300">{t('dashboard.filterEfficiency', 'Filter Efficiency')}:</span>
+              <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>{t('dashboard.filterEfficiency', 'Filter Efficiency')}:</span>
               <span className="text-sm font-medium text-emerald-400">
                 {transactions.length > 0 ? ((filteredTransactions.length / transactions.length) * 100).toFixed(1) : 0}%
               </span>
@@ -118,47 +123,51 @@ export default function DashboardLayout({ transactions = [], isLoading = false, 
           </div>
         </div>
 
-        <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6 hover:shadow-lg transition-shadow duration-200">
-          <h4 className="text-lg font-semibold text-white mb-2">{t('dashboard.quickStats', 'Quick Stats')}</h4>
+        <div className={`rounded-xl border p-6 hover:shadow-lg transition-shadow duration-200 ${
+          isDarkTheme ? 'bg-black/20 backdrop-blur-sm border-white/10' : 'bg-white border-gray-200 shadow-md'
+        }`}>
+          <h4 className={`text-lg font-semibold mb-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{t('dashboard.quickStats', 'Quick Stats')}</h4>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-300">{t('dashboard.fraudCases', 'Fraud Cases')}:</span>
+              <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>{t('dashboard.fraudCases', 'Fraud Cases')}:</span>
               <span className="text-sm font-medium text-red-400">
                 {filteredTransactions.filter(t => t.status === 'Fraud').length}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-300">{t('dashboard.safeTransactions', 'Safe Transactions')}:</span>
+              <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>{t('dashboard.safeTransactions', 'Safe Transactions')}:</span>
               <span className="text-sm font-medium text-emerald-400">
                 {filteredTransactions.filter(t => t.status === 'Legitimate' || t.status === 'Safe').length}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-300">{t('dashboard.totalValue', 'Total Value')}:</span>
-              <span className="text-sm font-medium text-white">
+              <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>{t('dashboard.totalValue', 'Total Value')}:</span>
+              <span className={`text-sm font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
                 ${filteredTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0).toLocaleString()}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6 hover:shadow-lg transition-shadow duration-200">
-          <h4 className="text-lg font-semibold text-white mb-2">{t('dashboard.dataQuality', 'Data Quality')}</h4>
+        <div className={`rounded-xl border p-6 hover:shadow-lg transition-shadow duration-200 ${
+          isDarkTheme ? 'bg-black/20 backdrop-blur-sm border-white/10' : 'bg-white border-gray-200 shadow-md'
+        }`}>
+          <h4 className={`text-lg font-semibold mb-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{t('dashboard.dataQuality', 'Data Quality')}</h4>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-300">{t('dashboard.completeRecords', 'Complete Records')}:</span>
-              <span className="text-sm font-medium text-white">
+              <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>{t('dashboard.completeRecords', 'Complete Records')}:</span>
+              <span className={`text-sm font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
                 {filteredTransactions.filter(t => t.id && t.amount && t.date && t.status).length}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-300">{t('dashboard.kycVerified', 'KYC Verified')}:</span>
+              <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>{t('dashboard.kycVerified', 'KYC Verified')}:</span>
               <span className="text-sm font-medium text-blue-400">
                 {filteredTransactions.filter(t => t.kycStatus || t.kyc).length}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-300">{t('dashboard.dataCompleteness', 'Data Completeness')}:</span>
+              <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>{t('dashboard.dataCompleteness', 'Data Completeness')}:</span>
               <span className="text-sm font-medium text-purple-400">
                 {filteredTransactions.length > 0 ?
                   ((filteredTransactions.filter(t => t.id && t.amount && t.date && t.status).length / filteredTransactions.length) * 100).toFixed(1) : 0}%

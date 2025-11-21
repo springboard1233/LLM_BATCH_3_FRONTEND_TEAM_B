@@ -14,9 +14,6 @@ import ExportControls from './components/ExportControls'
 import ExportPreviewTable from './components/ExportPreviewTable'
 import Reports from './components/Reports'
 import Toast from './components/Toast'
-import ThemeDebug from './components/ThemeDebug'
-import LoginPage from './components/LoginPage'
-import SignupPage from './components/SignupPage'
 
 import RiskLevelIndicator from '../RiskLevelIndicator.jsx'
 import SearchFilterBar from '../SearchFilterBar.jsx'
@@ -27,7 +24,6 @@ import AnalyticsView from '../AnalyticsView.jsx'
 import FraudDetection from '../FraudDetection.jsx'
 import TransactionManagement from '../TransactionManagement'
 import RiskAnalysis from '../RiskAnalysis'
-import ActivityMap from './components/ActivityMap'
 
 function App() {
   return (
@@ -44,9 +40,6 @@ function AppContent() {
   const { effectiveTheme } = useSettings();
   const isDarkTheme = effectiveTheme === 'dark';
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState(null)
-  const [authView, setAuthView] = useState('login') // 'login' or 'signup'
   const [isLiveStream, setIsLiveStream] = useState(false)
   const [uploadedFile, setUploadedFile] = useState(null)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -87,8 +80,7 @@ function AppContent() {
     { id: 'risk-analysis', label: 'Risk Analysis' },
     { id: 'activity-map', label: 'Activity Map' },
     { id: 'reports', label: 'Reports' },
-    { id: 'export', label: 'Export' },
-    { id: 'settings', label: 'Settings' }
+    { id: 'export', label: 'Export' }
   ]
 
   const renderHeader = () => (
@@ -97,8 +89,6 @@ function AppContent() {
       lastUpdated={lastUpdated}
       transactions={transactions}
       onBackToLanding={() => setCurrentView('landing')}
-      user={user}
-      onLogout={handleLogout}
       rightContent={
         <LiveToggle
           isLiveStream={isLiveStream}
@@ -111,13 +101,15 @@ function AppContent() {
   const renderMainContent = () => {
     if (isLoading) {
       return (
-        <div className="text-center text-white p-10">Loading backend data...</div>
+        <div className={`text-center p-10 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+          Loading backend data...
+        </div>
       )
     }
 
     if (error) {
       return (
-        <div className="text-center text-red-400 p-10">Error fetching data: {error}</div>
+        <div className="text-center text-red-500 p-10">Error fetching data: {error}</div>
       )
     }
 
@@ -125,7 +117,11 @@ function AppContent() {
       case 'dashboard':
         return (
           <div className="space-y-6">
-            <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+            <div className={`backdrop-blur-md rounded-xl border p-6 shadow-lg ${
+              isDarkTheme 
+                ? 'bg-black/20 border-white/10 text-white' 
+                : 'bg-white/70 border-gray-300/50 text-gray-900 shadow-blue-100/50'
+            }`}>
               <h3 className="text-xl font-semibold mb-4">Data Upload</h3>
               <DataUploadZone
                 uploadedFile={uploadedFile}
@@ -157,7 +153,11 @@ function AppContent() {
       case 'analytics':
         return (
           <div className="space-y-6">
-            <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+            <div className={`backdrop-blur-md rounded-xl border p-6 shadow-lg ${
+              isDarkTheme 
+                ? 'bg-black/20 border-white/10 text-white' 
+                : 'bg-white/70 border-gray-300/50 text-gray-900 shadow-blue-100/50'
+            }`}>
               <h3 className="text-xl font-semibold mb-4">Analytics & Insights</h3>
               <AnalyticsView data={transactions} />
             </div>
@@ -183,7 +183,11 @@ function AppContent() {
       case 'fraud-detection':
         return (
           <div className="space-y-6">
-            <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+            <div className={`backdrop-blur-md rounded-xl border p-6 shadow-lg ${
+              isDarkTheme 
+                ? 'bg-black/20 border-white/10 text-white' 
+                : 'bg-white/70 border-gray-300/50 text-gray-900 shadow-blue-100/50'
+            }`}>
               <h3 className="text-xl font-semibold mb-4">Fraud Detection Lab</h3>
               <FraudDetection />
             </div>
@@ -193,7 +197,11 @@ function AppContent() {
       case 'export':
         return (
           <div className="space-y-6">
-            <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+            <div className={`backdrop-blur-md rounded-xl border p-6 shadow-lg ${
+              isDarkTheme 
+                ? 'bg-black/20 border-white/10 text-white' 
+                : 'bg-white/70 border-gray-300/50 text-gray-900 shadow-blue-100/50'
+            }`}>
               <h2 className="text-2xl font-bold mb-6">Export & Reporting</h2>
               <ExportControls
                 exportFormat={exportFormat}
@@ -221,72 +229,21 @@ function AppContent() {
       case 'reports':
         return <Reports transactions={transactions} />
 
-      case 'settings':
-        return <SettingsPage />
-
-      case 'activity-map':
-        return (
-          <div className="space-y-6">
-            <ActivityMap theme={isDarkTheme ? 'dark' : 'light'} />
-          </div>
-        )
-
       default:
         return (
-          <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className={`backdrop-blur-md rounded-xl border p-8 text-center shadow-lg ${
+            isDarkTheme 
+              ? 'bg-black/20 border-white/10' 
+              : 'bg-white/70 border-gray-300/50 shadow-blue-100/50'
+          }`}>
+            <h2 className={`text-2xl font-bold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
               {activeSection.replace('-', ' ').toUpperCase()}
             </h2>
-            <p className="text-gray-300">This section is under development...</p>
+            <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-600'}>
+              This section is under development...
+            </p>
           </div>
         )
-    }
-  }
-
-  const handleLogin = (userData) => {
-    setUser(userData)
-    setIsAuthenticated(true)
-  }
-
-  const handleSignup = (userData) => {
-    setUser(userData)
-    setIsAuthenticated(true)
-  }
-
-  const handleContinueAsGuest = () => {
-    setUser({
-      email: 'guest@secureguard.com',
-      name: 'Guest User',
-      role: 'Guest',
-      isGuest: true
-    })
-    setIsAuthenticated(true)
-  }
-
-  const handleLogout = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    setCurrentView('landing')
-  }
-
-  // Show login/signup if not authenticated
-  if (!isAuthenticated) {
-    if (authView === 'login') {
-      return (
-        <LoginPage 
-          onLogin={handleLogin} 
-          onSwitchToSignup={() => setAuthView('signup')}
-          onContinueAsGuest={handleContinueAsGuest}
-        />
-      )
-    } else {
-      return (
-        <SignupPage 
-          onSignup={handleSignup} 
-          onSwitchToLogin={() => setAuthView('login')}
-          onContinueAsGuest={handleContinueAsGuest}
-        />
-      )
     }
   }
 
@@ -295,8 +252,11 @@ function AppContent() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 relative overflow-hidden">
-      <ThemeDebug />
+    <div className={`flex h-screen relative overflow-hidden transition-colors duration-300 ${
+      isDarkTheme 
+        ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+    }`}>
       <NavigationSidebar
         activeSection={activeSection}
         onSectionChange={setActiveSection}

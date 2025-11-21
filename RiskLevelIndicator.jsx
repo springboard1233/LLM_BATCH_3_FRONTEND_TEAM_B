@@ -1,7 +1,10 @@
 import { useMemo } from 'react'
 import { Shield, AlertTriangle, AlertCircle } from 'lucide-react'
+import { useSettings } from './src/contexts/SettingsContext'
 
 export default function RiskLevelIndicator({ transactions = [] }) {
+  const { effectiveTheme } = useSettings();
+  const isDarkTheme = effectiveTheme === 'dark';
   const riskAnalysis = useMemo(() => {
     const total = transactions.length
     const fraudCount = transactions.filter(t => t.status === 'Fraud').length
@@ -53,25 +56,25 @@ export default function RiskLevelIndicator({ transactions = [] }) {
 
   const colorClasses = {
     green: {
-      bg: 'bg-green-50 dark:bg-green-900/20',
-      border: 'border-green-200 dark:border-green-700',
-      text: 'text-green-800 dark:text-green-300',
-      icon: 'text-green-600 dark:text-green-400',
-      badge: 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200'
+      bg: isDarkTheme ? 'bg-green-900/20' : 'bg-green-50',
+      border: isDarkTheme ? 'border-green-700' : 'border-green-200',
+      text: isDarkTheme ? 'text-green-300' : 'text-green-800',
+      icon: isDarkTheme ? 'text-green-400' : 'text-green-600',
+      badge: isDarkTheme ? 'bg-green-800 text-green-200' : 'bg-green-100 text-green-800'
     },
     yellow: {
-      bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-      border: 'border-yellow-200 dark:border-yellow-700',
-      text: 'text-yellow-800 dark:text-yellow-300',
-      icon: 'text-yellow-600 dark:text-yellow-400',
-      badge: 'bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200'
+      bg: isDarkTheme ? 'bg-yellow-900/20' : 'bg-yellow-50',
+      border: isDarkTheme ? 'border-yellow-700' : 'border-yellow-200',
+      text: isDarkTheme ? 'text-yellow-300' : 'text-yellow-800',
+      icon: isDarkTheme ? 'text-yellow-400' : 'text-yellow-600',
+      badge: isDarkTheme ? 'bg-yellow-800 text-yellow-200' : 'bg-yellow-100 text-yellow-800'
     },
     red: {
-      bg: 'bg-red-50 dark:bg-red-900/20',
-      border: 'border-red-200 dark:border-red-700',
-      text: 'text-red-800 dark:text-red-300',
-      icon: 'text-red-600 dark:text-red-400',
-      badge: 'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200'
+      bg: isDarkTheme ? 'bg-red-900/20' : 'bg-red-50',
+      border: isDarkTheme ? 'border-red-700' : 'border-red-200',
+      text: isDarkTheme ? 'text-red-300' : 'text-red-800',
+      icon: isDarkTheme ? 'text-red-400' : 'text-red-600',
+      badge: isDarkTheme ? 'bg-red-800 text-red-200' : 'bg-red-100 text-red-800'
     }
   }
 
@@ -79,8 +82,10 @@ export default function RiskLevelIndicator({ transactions = [] }) {
   const RiskIcon = riskAnalysis.icon
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Transaction Risk Level</h3>
+    <div className={`rounded-xl shadow-sm border p-4 ${
+      isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+    }`}>
+      <h3 className={`text-sm font-semibold mb-3 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Transaction Risk Level</h3>
       
       {/* Risk Level Badge */}
       <div className="flex items-center space-x-2 mb-4">
@@ -91,7 +96,7 @@ export default function RiskLevelIndicator({ transactions = [] }) {
           <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${colors.badge}`}>
             {riskAnalysis.level} Risk
           </span>
-          <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          <div className={`text-xs mt-1 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
             {riskAnalysis.fraudRate}% fraud rate
           </div>
         </div>
@@ -99,36 +104,36 @@ export default function RiskLevelIndicator({ transactions = [] }) {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+        <div className={`rounded-lg p-3 ${isDarkTheme ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
           <div className="flex items-center space-x-2">
-            <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Total Transactions</div>
+            <div className={`text-xs font-medium ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Total Transactions</div>
           </div>
-          <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mt-1">
+          <div className={`text-lg font-bold mt-1 ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`}>
             {riskAnalysis.total}
           </div>
         </div>
         
-        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
+        <div className={`rounded-lg p-3 ${isDarkTheme ? 'bg-red-900/20' : 'bg-red-50'}`}>
           <div className="flex items-center space-x-2">
-            <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Fraud Cases</div>
+            <div className={`text-xs font-medium ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Fraud Cases</div>
           </div>
-          <div className="text-lg font-bold text-red-600 dark:text-red-400 mt-1">
+          <div className={`text-lg font-bold mt-1 ${isDarkTheme ? 'text-red-400' : 'text-red-600'}`}>
             {riskAnalysis.fraudCount}
           </div>
         </div>
       </div>
 
       {/* Risk Assessment */}
-      <div className={`${colors.bg} dark:bg-gray-700/50 rounded-lg p-3 mb-4`}>
-        <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Risk Assessment</h4>
-        <p className={`text-xs ${colors.text} dark:text-gray-300`}>
+      <div className={`${colors.bg} rounded-lg p-3 mb-4`}>
+        <h4 className={`text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Risk Assessment</h4>
+        <p className={`text-xs ${colors.text}`}>
           {riskAnalysis.recommendation}
         </p>
       </div>
 
       {/* Additional Insights */}
-      <div className="pt-3 border-t border-gray-200 dark:border-gray-600">
-        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+      <div className={`pt-3 border-t ${isDarkTheme ? 'border-gray-600' : 'border-gray-200'}`}>
+        <div className={`flex items-center justify-between text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
           <span>High Value Fraud: {riskAnalysis.highValueFraud}</span>
           <span>Risk Level: {riskAnalysis.level}</span>
         </div>

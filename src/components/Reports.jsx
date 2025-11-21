@@ -80,8 +80,8 @@ function Reports() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
-        <h2 className="text-2xl font-bold mb-6">Reports Generation</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Reports Generation</h2>
 
         {/* Date Range */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -91,7 +91,7 @@ function Reports() {
               type="date"
               value={dateRange.start}
               onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-              className="w-full p-2 bg-black/20 border border-white/10 rounded-lg"
+              className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
             />
           </div>
           <div>
@@ -100,7 +100,7 @@ function Reports() {
               type="date"
               value={dateRange.end}
               onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-              className="w-full p-2 bg-black/20 border border-white/10 rounded-lg"
+              className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
             />
           </div>
         </div>
@@ -112,12 +112,12 @@ function Reports() {
               key={report.id}
               className={`p-4 rounded-lg border transition-all cursor-pointer
                 ${selectedReport?.id === report.id 
-                  ? 'border-blue-500 bg-blue-500/10' 
-                  : 'border-white/10 hover:border-white/30'}`}
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                  : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'}`}
               onClick={() => setSelectedReport(report)}
             >
-              <h3 className="font-semibold mb-2">{report.label}</h3>
-              <p className="text-sm text-gray-400">{report.description}</p>
+              <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">{report.label}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{report.description}</p>
             </div>
           ))}
         </div>
@@ -137,8 +137,8 @@ function Reports() {
 
       {/* Preview */}
       {selectedReport && (
-        <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
-          <h3 className="text-xl font-semibold mb-4">Report Preview</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+          <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Report Preview</h3>
           <ReportPreview type={selectedReport} transactions={transactions} dateRange={dateRange} />
         </div>
       )}
@@ -152,8 +152,8 @@ function ReportPreview({ type, transactions, dateRange }) {
     <div className="space-y-4">
       {Object.entries(data).map(([key, value]) => (
         <div key={key} className="flex flex-col">
-          <span className="text-sm text-gray-400">{key}</span>
-          <span className="font-mono text-sm">{JSON.stringify(value, null, 2)}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">{key}</span>
+          <span className="font-mono text-sm text-gray-900 dark:text-gray-100">{JSON.stringify(value, null, 2)}</span>
         </div>
       ))}
     </div>

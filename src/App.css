@@ -2,6 +2,8 @@
 .app {
   min-height: 100vh;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 /* Loading animations */
@@ -18,29 +20,33 @@
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Theme aware */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--bg-secondary);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--border-secondary);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--text-muted);
 }
 
-/* Table hover effects */
+/* Table hover effects - Theme aware */
 .transactions-table tbody tr:hover {
-  background-color: #f9fafb;
+  background-color: var(--bg-hover);
+}
+
+[data-theme="dark"] .transactions-table tbody tr:hover {
+  background-color: var(--bg-tertiary);
 }
 
 /* Alert animations */
@@ -120,4 +126,150 @@ input:focus {
 
 .card:hover {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Enhanced card visibility in light mode */
+[data-theme="light"] .bg-white {
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08), 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .bg-white:hover {
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.08);
+}
+
+
+/* Solid backgrounds - NO glass effects */
+.backdrop-blur-sm,
+.backdrop-blur-md,
+.backdrop-blur-lg,
+.backdrop-blur-xl {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Light mode - solid white background */
+[data-theme="light"] .backdrop-blur-md,
+[data-theme="light"] .backdrop-blur-sm,
+[data-theme="light"] .backdrop-blur-lg,
+[data-theme="light"] .backdrop-blur-xl {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+/* Dark mode - solid dark background (NO glass) */
+[data-theme="dark"] .backdrop-blur-md,
+[data-theme="dark"] .backdrop-blur-sm,
+[data-theme="dark"] .backdrop-blur-lg,
+[data-theme="dark"] .backdrop-blur-xl {
+  background: #1f2937 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  border: 1px solid #374151;
+}
+
+/* Hover effects for solid cards */
+[data-theme="light"] .backdrop-blur-md:hover,
+[data-theme="light"] .backdrop-blur-sm:hover {
+  background: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #d1d5db;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .backdrop-blur-md:hover,
+[data-theme="dark"] .backdrop-blur-sm:hover {
+  background: #374151 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  border: 1px solid #4b5563;
+  transition: all 0.3s ease;
+}
+
+
+/* Light mode - clean solid background, no pattern */
+[data-theme="light"] body::before {
+  content: none;
+}
+
+[data-theme="dark"] body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content is above the background pattern */
+.flex.h-screen {
+  position: relative;
+  z-index: 1;
+}
+
+/* Solid Design - NO Glass Effects */
+
+/* Remove all semi-transparent backgrounds */
+.bg-black\/20,
+.bg-white\/10,
+.bg-gray-800\/50,
+.bg-gray-900\/50 {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Light mode - solid white cards */
+[data-theme="light"] .bg-black\/20,
+[data-theme="light"] .bg-white\/10,
+[data-theme="light"] .bg-gray-800\/50,
+[data-theme="light"] .bg-gray-900\/50 {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Dark mode - solid dark cards */
+[data-theme="dark"] .bg-black\/20,
+[data-theme="dark"] .bg-white\/10,
+[data-theme="dark"] .bg-gray-800\/50,
+[data-theme="dark"] .bg-gray-900\/50 {
+  background: #1f2937 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #374151 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="light"] .border-white\/10 {
+  border-color: #e5e7eb !important;
+}
+
+[data-theme="dark"] .border-white\/10 {
+  border-color: #374151 !important;
+}
+
+/* Text color fixes for light mode solid cards */
+[data-theme="light"] .bg-black\/20 .text-white,
+[data-theme="light"] .bg-white\/10 .text-white {
+  color: #111827 !important;
+}
+
+[data-theme="light"] .bg-black\/20 .text-gray-300,
+[data-theme="light"] .bg-white\/10 .text-gray-300 {
+  color: #6b7280 !important;
+}
+
+[data-theme="light"] .bg-black\/20 .text-gray-400,
+[data-theme="light"] .bg-white\/10 .text-gray-400 {
+  color: #9ca3af !important;
 }
