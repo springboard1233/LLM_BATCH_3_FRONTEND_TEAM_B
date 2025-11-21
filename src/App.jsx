@@ -6,7 +6,7 @@ import DashboardHeader from '../DashboardHeader.jsx'
 import NavigationSidebar from '../NavigationSidebar.jsx'
 import SystemStatus from '../SystemStatus.jsx'
 import QuickStats from '../QuickStats.jsx'
-import { SettingsProvider } from './contexts/SettingsContext.jsx'
+import { SettingsProvider, useSettings } from './contexts/SettingsContext.jsx'
 
 import DataUploadZone from './components/DataUploadZone'
 import LiveToggle from './components/LiveToggle'
@@ -22,6 +22,8 @@ import KeyPerformanceIndicators from '../KeyPerformanceIndicators.jsx'
 import { DashboardProvider, useDashboard } from './contexts/DashboardContext'
 import AnalyticsView from '../AnalyticsView.jsx'
 import FraudDetection from '../FraudDetection.jsx'
+import TransactionManagement from '../TransactionManagement'
+import RiskAnalysis from '../RiskAnalysis'
 
 function App() {
   return (
@@ -34,6 +36,10 @@ function App() {
 }
 
 function AppContent() {
+  // 🔥 THE FIX — IMPORT EFFECTIVE THEME
+  const { effectiveTheme } = useSettings();
+  const isDarkTheme = effectiveTheme === 'dark';
+
   const [isLiveStream, setIsLiveStream] = useState(false)
   const [uploadedFile, setUploadedFile] = useState(null)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -44,7 +50,7 @@ function AppContent() {
   const [isExporting, setIsExporting] = useState(false)
   const [toast, setToast] = useState(null)
 
-  // ✅ fetch data from FastAPI (provided by DashboardProvider)
+  // Backend data
   const { 
     transactions, 
     loading: isLoading, 
@@ -137,6 +143,7 @@ function AppContent() {
             />
           </div>
         )
+
       case 'analytics':
         return (
           <div className="space-y-6">
@@ -146,6 +153,23 @@ function AppContent() {
             </div>
           </div>
         )
+
+      case 'transaction-management':
+        return (
+          <div className="space-y-6">
+            {/* 🔥 FIXED THEME PROP */}
+            <TransactionManagement theme={isDarkTheme ? 'dark' : 'light'} />
+          </div>
+        )
+
+      case 'risk-analysis':
+        return (
+          <div className="space-y-6">
+            {/* 🔥 FIXED THEME PROP */}
+            <RiskAnalysis theme={isDarkTheme ? 'dark' : 'light'} />
+          </div>
+        )
+
       case 'fraud-detection':
         return (
           <div className="space-y-6">
