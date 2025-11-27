@@ -102,6 +102,16 @@ class ApiService {
     }
   }
 
+  async getPredictionHistory(page = 1, limit = 15) {
+    try {
+      const params = new URLSearchParams({ page, limit }).toString();
+      return await this.makeRequest(`/prediction/history?${params}`);
+    } catch (error) {
+      console.error('Failed to fetch prediction history:', error);
+      throw error;
+    }
+  }
+
   // Filter transactions
   async filterTransactions(params = {}) {
     try {
