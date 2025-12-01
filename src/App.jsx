@@ -13,6 +13,7 @@ import LiveToggle from './components/LiveToggle'
 import ExportControls from './components/ExportControls'
 import ExportPreviewTable from './components/ExportPreviewTable'
 import Reports from './components/Reports'
+import ActivityMap from "./components/ActivityMap";
 import Toast from './components/Toast'
 
 import RiskLevelIndicator from '../RiskLevelIndicator.jsx'
@@ -226,6 +227,14 @@ function AppContent() {
           </div>
         )
 
+      case "activity-map":
+        return (
+          <div className="space-y-6">
+            <ActivityMap theme={isDarkTheme ? "dark" : "light"} />
+          </div>
+        ) 
+        
+        
       case 'reports':
         return <Reports transactions={transactions} />
 

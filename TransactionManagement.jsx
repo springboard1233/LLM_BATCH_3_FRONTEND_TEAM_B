@@ -12,7 +12,7 @@ import {
 } from 'recharts';
 
 const PAGE_SIZE = 15;
-const MAX_RESULTS = 100; // cap at 100 samples as requested
+const MAX_RESULTS = 200; // safety cap to avoid loading too much in UI
 
 // Generate mock transactions with fraud cases
 const generateMockTransactions = (page, limit) => {
@@ -54,6 +54,7 @@ const TransactionManagement = ({ theme = 'dark' }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedTransactions, setSelectedTransactions] = useState([]);
+  const [detailsModalTxn, setDetailsModalTxn] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,7 +62,8 @@ const TransactionManagement = ({ theme = 'dark' }) => {
   // pagination state (client-side view)
   const [currentPage, setCurrentPage] = useState(1);
   const [totalFetched, setTotalFetched] = useState(0);
-  const [hasMorePages, setHasMorePages] = useState(true);
+  const [hasMorePages, setHasMorePages] = useState(false);
+  const [lastFetchedPage, setLastFetchedPage] = useState(0);
 
   const isDark = theme === 'dark';
 
@@ -73,34 +75,10 @@ const TransactionManagement = ({ theme = 'dark' }) => {
 
   const fetchPage = async (page) => {
     try {
-      if (totalFetched >= MAX_RESULTS) return;
-
       setLoading(true);
       setError(null);
 
-      let res;
-      let usedMockData = false;
-      
-      // ALWAYS use mock data for now to ensure fraud data is present
-      console.log('Using mock data with fraud cases');
-      res = generateMockTransactions(page, PAGE_SIZE);
-      usedMockData = true;
-      
-      /* Uncomment this to try API first
-      try {
-        res = await apiService.getTransactions(page, PAGE_SIZE);
-        // Check if API returned empty or invalid data
-        const raw = res?.items || res?.transactions || res?.data || res || [];
-        if (!Array.isArray(raw) || raw.length === 0) {
-          throw new Error('API returned no data');
-        }
-      } catch (apiError) {
-        console.warn('API failed or returned no data, using mock data:', apiError);
-        // Generate mock data if API fails or returns empty
-        res = generateMockTransactions(page, PAGE_SIZE);
-        usedMockData = true;
-      }
-      */
+      const res = await apiService.getPredictionHistory(page, PAGE_SIZE);
 
       const raw =
         res?.items ||
@@ -114,31 +92,56 @@ const TransactionManagement = ({ theme = 'dark' }) => {
         : [];
 
       const fraudInBatch = normalized.filter(t => t.isFraud === true).length;
-      console.log('Fetched transactions:', { 
+      console.log('Fetched prediction history:', { 
         page, 
         count: normalized.length, 
-        usedMockData, 
         fraudCount: fraudInBatch,
         sampleTransaction: normalized[0],
         rawSample: raw[0]
       });
 
-      const newList = [...transactions, ...normalized].slice(0, MAX_RESULTS);
+      setTransactions((prev) => {
+        if (page === 1) {
+          return normalized.slice(0, MAX_RESULTS);
+        }
 
-      setTransactions(newList);
-      setTotalFetched(newList.length);
-      setHasMorePages(normalized.length === PAGE_SIZE && !usedMockData);
+        const existingIds = new Set(prev.map((txn) => txn.id));
+        const merged = [...prev];
+        normalized.forEach((txn) => {
+          if (!existingIds.has(txn.id)) {
+            merged.push(txn);
+            existingIds.add(txn.id);
+          }
+        });
+        return merged.slice(0, MAX_RESULTS);
+      });
+
+      setTotalFetched((prev) => {
+        if (page === 1) return normalized.length;
+        return Math.min(MAX_RESULTS, prev + normalized.length);
+      });
+
+      setHasMorePages(Boolean(res?.has_next));
+      setLastFetchedPage(page);
 
     } catch (err) {
       console.error('Failed to fetch transactions:', err);
+      setError('Failed to load prediction history, showing sample data.');
+
       // Use mock data as final fallback
       const mockRes = generateMockTransactions(page, PAGE_SIZE);
       const mockRaw = mockRes?.data || [];
       const normalized = Array.isArray(mockRaw) ? mockRaw.map(normalizeTransaction) : [];
-      const newList = [...transactions, ...normalized].slice(0, MAX_RESULTS);
-      setTransactions(newList);
-      setTotalFetched(newList.length);
+      setTransactions((prev) => {
+        if (page === 1) return normalized;
+        return [...prev, ...normalized].slice(0, MAX_RESULTS);
+      });
+      setTotalFetched((prev) => {
+        if (page === 1) return normalized.length;
+        return Math.min(MAX_RESULTS, prev + normalized.length);
+      });
       setHasMorePages(false);
+      setLastFetchedPage(page);
     } finally {
       setLoading(false);
     }
@@ -146,7 +149,7 @@ const TransactionManagement = ({ theme = 'dark' }) => {
 
   // --- Normalize backend transaction object into UI shape ---
   const normalizeTransaction = (t) => {
-    const id = t.transaction_id || t.id || t._id || 'UNKNOWN';
+    const id = t.id || t.transaction_id || t._id || 'UNKNOWN';
     const customerId = t.customer_id || t.customerId || 'N/A';
     const amount =
       t.amount ?? t.transaction_amount ?? t.txn_amount ?? 0;
@@ -156,8 +159,8 @@ const TransactionManagement = ({ theme = 'dark' }) => {
     let isFraud = false;
     if (typeof t.is_fraud === 'boolean') {
       isFraud = t.is_fraud;
-    } else if (t.isFraud === true) {
-      isFraud = true;
+    } else if (typeof t.isFraud === 'boolean') {
+      isFraud = t.isFraud;
     } else if (t.status === 'flagged' || t.status === 'fraud') {
       isFraud = true;
     }
@@ -267,13 +270,13 @@ const TransactionManagement = ({ theme = 'dark' }) => {
     currentPage * PAGE_SIZE
   );
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentPage < totalPages) {
       setCurrentPage((p) => p + 1);
     } else if (hasMorePages) {
-      // try loading more from backend (next server page)
-      const nextServerPage = transactions.length / PAGE_SIZE + 1;
-      fetchPage(nextServerPage);
+      const nextServerPage = lastFetchedPage + 1;
+      await fetchPage(nextServerPage);
+      setCurrentPage((p) => p + 1);
     }
   };
 
@@ -543,6 +546,7 @@ const TransactionManagement = ({ theme = 'dark' }) => {
                 <th className="px-6 py-3">Risk Score</th>
                 <th className="px-6 py-3">Flags</th>
                 <th className="px-6 py-3">Timestamp</th>
+                <th className="px-6 py-3 text-right">LLM Reasons</th>
               </tr>
             </thead>
             <tbody>
@@ -607,6 +611,20 @@ const TransactionManagement = ({ theme = 'dark' }) => {
                   <td className="px-6 py-3 text-xs text-gray-400">
                     {txn.timestamp}
                   </td>
+                  <td className="px-6 py-3">
+                    <button
+                      type="button"
+                      onClick={() => setDetailsModalTxn(txn)}
+                      disabled={!txn.explanation && (!txn.ruleReasons || txn.ruleReasons.length === 0)}
+                      className={`text-xs px-3 py-1 rounded-full border transition ${
+                        txn.explanation || (txn.ruleReasons && txn.ruleReasons.length)
+                          ? 'border-emerald-400 text-emerald-200 hover:bg-emerald-400/10'
+                          : 'border-gray-600 text-gray-500 cursor-not-allowed'
+                      }`}
+                    >
+                      View Reason
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -642,6 +660,47 @@ const TransactionManagement = ({ theme = 'dark' }) => {
           Next
         </button>
       </div>
+
+      {detailsModalTxn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+          <div className={`max-w-2xl w-full rounded-2xl p-6 relative border ${isDark ? 'bg-slate-900 border-white/10 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
+            <button
+              className="absolute top-4 right-4 text-sm text-gray-400 hover:text-gray-200"
+              onClick={() => setDetailsModalTxn(null)}
+            >
+              Close
+            </button>
+            <h3 className="text-xl font-semibold mb-2">AI Explanation</h3>
+            <p className="text-sm text-gray-400 mb-4">Transaction {detailsModalTxn.id}</p>
+
+            {detailsModalTxn.explanation ? (
+              <p className="whitespace-pre-wrap text-sm leading-relaxed mb-4">{detailsModalTxn.explanation}</p>
+            ) : (
+              <p className="text-sm text-gray-400 mb-4">No LLM explanation stored.</p>
+            )}
+
+            {detailsModalTxn.ruleReasons && detailsModalTxn.ruleReasons.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm font-semibold mb-2">Rule Triggers</p>
+                <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+                  {detailsModalTxn.ruleReasons.map((reason, idx) => (
+                    <li key={idx}>{reason}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                className="px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400"
+                onClick={() => setDetailsModalTxn(null)}
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
