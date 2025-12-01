@@ -62,7 +62,10 @@ const AnalyticsView = ({ data }) => {
         const analyticsData = await response.json();
         setBackendData(analyticsData);
       } catch (err) {
-        console.warn('Failed to fetch analytics from backend:', err && err.message ? err.message : err);
+        console.warn(
+          'Failed to fetch analytics from backend:',
+          err && err.message ? err.message : err
+        );
         setError(err && err.message ? err.message : String(err));
         setBackendData(null);
       } finally {
@@ -198,6 +201,38 @@ const AnalyticsView = ({ data }) => {
     return { hourly, daily };
   }, [backendData, data]);
 
+  // 🔹 Feature Importance – expects backendData.feature_importance
+  const featureImportanceData = useMemo(() => {
+    if (backendData && backendData.feature_importance) {
+      const raw = backendData.feature_importance;
+
+      // Accept both array of objects or dict {feature: importance}
+      const arr = Array.isArray(raw)
+        ? raw
+        : Object.entries(raw).map(([feature, importance]) => ({
+            feature,
+            importance,
+          }));
+
+      return arr
+        .map((item) => ({
+          feature: item.feature || item.name || String(item[0]),
+          importance:
+            typeof item.importance === 'number'
+              ? item.importance
+              : typeof item.value === 'number'
+              ? item.value
+              : Number(item[1]) || 0,
+        }))
+        .filter((d) => !Number.isNaN(d.importance))
+        .sort((a, b) => b.importance - a.importance) // highest first
+        .slice(0, 10); // top 10 features
+    }
+
+    // no backend feature importance -> empty
+    return [];
+  }, [backendData]);
+
   // For formatting currency on chart hover
   const formatCurrencyTooltip = (value) => {
     if (value == null) return value;
@@ -272,10 +307,13 @@ const AnalyticsView = ({ data }) => {
         {[
           {
             title: 'Fraud Loss',
-            value: `₹${Number(analyticsMetrics.fraudLoss || 0).toLocaleString('en-IN', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`,
+            value: `₹${Number(analyticsMetrics.fraudLoss || 0).toLocaleString(
+              'en-IN',
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }
+            )}`,
             icon: AlertTriangle,
             color: COLORS.danger,
             iconColor: COLORS.danger,
@@ -427,6 +465,70 @@ const AnalyticsView = ({ data }) => {
             </PieChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* 🔹 Feature Importance section */}
+      <div
+        className="rounded-xl shadow-sm border p-6"
+        style={{
+          backgroundColor: COLORS.white,
+          borderColor: COLORS.grayBorder,
+        }}
+      >
+        <h3
+          className="text-lg font-semibold mb-4"
+          style={{ color: COLORS.grayTitle }}
+        >
+          Model Feature Importance
+        </h3>
+
+        {featureImportanceData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={featureImportanceData}
+              layout="vertical"
+              margin={{ top: 5, right: 20, left: 40, bottom: 5 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={COLORS.grayBorder}
+              />
+              <XAxis
+                type="number"
+                fontSize={12}
+                stroke={COLORS.grayText}
+                tickFormatter={(val) => `${(val * 100).toFixed(0)}%`}
+              />
+              <YAxis
+                type="category"
+                dataKey="feature"
+                fontSize={12}
+                stroke={COLORS.grayText}
+                width={120}
+              />
+              <Tooltip
+                formatter={(value) => [
+                  `${(value * 100).toFixed(2)}%`,
+                  'Importance',
+                ]}
+              />
+              <Bar
+                dataKey="importance"
+                fill={COLORS.primary}
+                radius={[0, 4, 4, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="text-sm" style={{ color: COLORS.grayText }}>
+            Feature importance data is not available. Make sure your backend
+            includes a <code>feature_importance</code> field in the response
+            from <code>/api/analytics/dashboard</code> (for example, as an
+            array of objects like
+            {" [{ feature: 'transaction_amount', importance: 0.35 }, ... ] "}
+            or a mapping of feature name to importance).
+          </p>
+        )}
       </div>
 
       {/* Transaction Activity Heatmap section*/}

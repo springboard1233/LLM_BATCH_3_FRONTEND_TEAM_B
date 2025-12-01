@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Shield, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { apiService } from '../services/api'; // ✅ use same central API helper
 
 const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
   const [formData, setFormData] = useState({
@@ -10,30 +11,46 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setError('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      if (formData.email && formData.password) {
-        // Mock successful login
-        onLogin({
-          email: formData.email,
-          name: formData.email.split('@')[0],
-          role: 'Admin User',
-        });
-      } else {
+    try {
+      if (!formData.email || !formData.password) {
         setError('Please fill in all fields');
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    }, 1000);
-  };
 
-  const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setError('');
+      // ✅ Call backend: POST /api/auth/login
+      const response = await apiService.loginRequest({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // apiService.loginRequest() already:
+      // - calls /auth/login
+      // - stores { access_token, user } in localStorage
+      // We just notify the parent app:
+      if (onLogin && response?.user) {
+        onLogin({
+          email: response.user.email,
+          name: response.user.name || response.user.email.split('@')[0],
+          role: 'Admin User', // or response.user.role if you add it later
+        });
+      }
+    } catch (err) {
+      console.error('Login failed:', err);
+      setError(err?.message || 'Failed to sign in. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -140,7 +157,7 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
             </div>
           </div>
 
-          {/* Social Login */}
+          {/* Social Login (still purely UI / mock) */}
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -180,7 +197,7 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <button
                 type="button"
                 onClick={onSwitchToSignup}
