@@ -2,13 +2,14 @@ import { useMemo } from 'react'
 import { Shield, AlertTriangle, AlertCircle } from 'lucide-react'
 import { useSettings } from './src/contexts/SettingsContext'
 
-export default function RiskLevelIndicator({ transactions = [] }) {
+export default function RiskLevelIndicator({ transactions = [], totalTransactions = 0, overviewStats = null }) {
   const { effectiveTheme } = useSettings();
   const isDarkTheme = effectiveTheme === 'dark';
   const riskAnalysis = useMemo(() => {
-    const total = transactions.length
-    const fraudCount = transactions.filter(t => t.status === 'Fraud').length
-    const fraudRate = total > 0 ? (fraudCount / total * 100) : 0
+    // Use backend totals if available
+    const total = totalTransactions > 0 ? totalTransactions : transactions.length
+    const fraudCount = overviewStats?.fraud_cases || transactions.filter(t => t.status === 'Fraud').length
+    const fraudRate = overviewStats?.fraud_percentage || (total > 0 ? (fraudCount / total * 100) : 0)
 
     // Calculate high-value transactions (above $1000)
     const highValueTransactions = transactions.filter(t => Number(t.amount) > 1000).length
@@ -39,7 +40,7 @@ export default function RiskLevelIndicator({ transactions = [] }) {
       total,
       recommendation: getRiskRecommendation(riskLevel, fraudRate, highValueFraud)
     }
-  }, [transactions])
+  }, [transactions, totalTransactions, overviewStats])
 
   function getRiskRecommendation(level, fraudRate, highValueFraud) {
     switch (level) {

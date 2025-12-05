@@ -264,10 +264,39 @@ class ApiService {
     }
   }
 
-  async getPredictionHistory(page = 1, limit = 15) {
+  // Channel distribution (all transactions)
+  async getChannelDistribution() {
     try {
-      const params = new URLSearchParams({ page, limit }).toString();
-      return await this.makeRequest(`/prediction/history?${params}`);
+      const data = await this.makeRequest('/analytics/channel_distribution');
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Failed to fetch channel distribution:', error);
+      return [];
+    }
+  }
+
+  async getPredictionHistory(page = 1, limit = 100, status = null) {
+    try {
+      const params = new URLSearchParams({ 
+        page: page.toString(), 
+        limit: limit.toString() 
+      });
+      
+      // Add status filter if provided
+      if (status && status !== 'all') {
+        params.append('status', status);
+      }
+      
+      console.log(`Fetching prediction history: page=${page}, limit=${limit}, status=${status}`);
+      const response = await this.makeRequest(`/prediction/history?${params.toString()}`);
+      console.log(`Prediction history response:`, { 
+        total: response?.total, 
+        page: response?.page, 
+        limit: response?.limit,
+        totalPages: response?.totalPages,
+        dataLength: response?.data?.length 
+      });
+      return response;
     } catch (error) {
       console.error('Failed to fetch prediction history:', error);
       throw error;
@@ -300,7 +329,7 @@ class ApiService {
   }
 
   // Get all transactions with pagination
-  async getTransactions(page = 1, limit = 10, filters = {}) {
+  async getTransactions(page = 1, limit = 100, filters = {}) {
     try {
       const params = {
         page,
@@ -308,6 +337,7 @@ class ApiService {
         ...filters
       };
       const queryString = new URLSearchParams(params).toString();
+      console.log(`Fetching transactions: page=${page}, limit=${limit}`);
       const response = await this.makeRequest(
         `/filter/transactions?${queryString}`
       );
@@ -316,19 +346,30 @@ class ApiService {
         ? response
         : response.data || [];
 
+      // Get total from backend response
+      const total = response.total || transformedData.length;
+      const totalPages = response.totalPages || Math.ceil(total / limit);
+
+      console.log(`Transactions response:`, { 
+        total, 
+        totalPages, 
+        currentPage: page,
+        dataLength: transformedData.length 
+      });
+
       return {
         data: transformedData.map((t) => ({
           id: t._id || t.id,
           customerId: t.customer_id,
           date: t.timestamp,
-          channel: t.channel_mobile ? 'Mobile' : 'Web',
+          channel: t.channel || (t.channel_mobile ? 'Mobile' : t.channel_web ? 'Web' : t.channel_atm ? 'ATM' : t.channel_pos ? 'POS' : 'Unknown'),
           amount: parseFloat(t.transaction_amount || 0),
           kycStatus: Boolean(t.kyc_status),
-          status: t.is_fraud ? 'Fraud' : 'Legitimate'
+          status: (t.is_fraud === 1 || t.is_fraud === true) ? 'Fraud' : 'Legitimate'
         })),
-        totalPages: Math.ceil(transformedData.length / limit),
+        totalPages: totalPages,
         currentPage: page,
-        total: transformedData.length
+        total: total
       };
     } catch (error) {
       console.error('Failed to fetch transactions:', error);

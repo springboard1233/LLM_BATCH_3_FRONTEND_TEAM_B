@@ -50,14 +50,27 @@ function AppContent() {
   const [exportData, setExportData] = useState([])
   const [isExporting, setIsExporting] = useState(false)
   const [toast, setToast] = useState(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // Backend data
   const { 
     transactions, 
+    totalTransactions,
+    overviewStats,
     loading: isLoading, 
     error,
     refreshData
   } = useDashboard();
+
+  // Debug logging
+  useEffect(() => {
+    console.log('📊 App.jsx - Dashboard State:', {
+      transactionsLength: transactions?.length,
+      totalTransactions,
+      isLoading,
+      error
+    });
+  }, [transactions, totalTransactions, isLoading, error]);
 
   const [currentView, setCurrentView] = useState('landing')
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -90,6 +103,7 @@ function AppContent() {
       lastUpdated={lastUpdated}
       transactions={transactions}
       onBackToLanding={() => setCurrentView('landing')}
+      onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       rightContent={
         <LiveToggle
           isLiveStream={isLiveStream}
@@ -102,7 +116,7 @@ function AppContent() {
   const renderMainContent = () => {
     if (isLoading) {
       return (
-        <div className={`text-center p-10 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+        <div className={`text-center p-6 md:p-10 text-sm md:text-base ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
           Loading backend data...
         </div>
       )
@@ -110,20 +124,20 @@ function AppContent() {
 
     if (error) {
       return (
-        <div className="text-center text-red-500 p-10">Error fetching data: {error}</div>
+        <div className="text-center text-red-500 p-6 md:p-10 text-sm md:text-base">Error fetching data: {error}</div>
       )
     }
 
     switch (activeSection) {
       case 'dashboard':
         return (
-          <div className="space-y-6">
-            <div className={`backdrop-blur-md rounded-xl border p-6 shadow-lg ${
+          <div className="space-y-4 md:space-y-6">
+            <div className={`backdrop-blur-md rounded-xl border p-4 md:p-6 shadow-lg ${
               isDarkTheme 
                 ? 'bg-black/20 border-white/10 text-white' 
                 : 'bg-white/70 border-gray-300/50 text-gray-900 shadow-blue-100/50'
             }`}>
-              <h3 className="text-xl font-semibold mb-4">Data Upload</h3>
+              <h3 className="text-lg md:text-xl font-semibold mb-4">Data Upload</h3>
               <DataUploadZone
                 uploadedFile={uploadedFile}
                 setUploadedFile={setUploadedFile}
@@ -133,19 +147,32 @@ function AppContent() {
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
               <div className="lg:col-span-3">
-                <SystemStatus transactions={transactions} />
+                <SystemStatus 
+                  transactions={transactions} 
+                  totalTransactions={totalTransactions}
+                />
               </div>
               <div className="lg:col-span-1">
-                <QuickStats transactions={transactions} />
+                <QuickStats 
+                  transactions={transactions}
+                  totalTransactions={totalTransactions}
+                  overviewStats={overviewStats}
+                />
               </div>
             </div>
 
-            <KeyPerformanceIndicators transactions={transactions} />
+            <KeyPerformanceIndicators 
+              transactions={transactions} 
+              totalTransactions={totalTransactions}
+              overviewStats={overviewStats}
+            />
 
             <DashboardLayout
               transactions={transactions}
+              totalTransactions={totalTransactions}
+              overviewStats={overviewStats}
               isLoading={isLoading}
             />
           </div>
@@ -153,13 +180,13 @@ function AppContent() {
 
       case 'analytics':
         return (
-          <div className="space-y-6">
-            <div className={`backdrop-blur-md rounded-xl border p-6 shadow-lg ${
+          <div className="space-y-4 md:space-y-6">
+            <div className={`backdrop-blur-md rounded-xl border p-4 md:p-6 shadow-lg ${
               isDarkTheme 
                 ? 'bg-black/20 border-white/10 text-white' 
                 : 'bg-white/70 border-gray-300/50 text-gray-900 shadow-blue-100/50'
             }`}>
-              <h3 className="text-xl font-semibold mb-4">Analytics & Insights</h3>
+              <h3 className="text-lg md:text-xl font-semibold mb-4">Analytics & Insights</h3>
               <AnalyticsView data={transactions} />
             </div>
           </div>
@@ -167,7 +194,7 @@ function AppContent() {
 
       case 'transaction-management':
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* 🔥 FIXED THEME PROP */}
             <TransactionManagement theme={isDarkTheme ? 'dark' : 'light'} />
           </div>
@@ -175,7 +202,7 @@ function AppContent() {
 
       case 'risk-analysis':
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* 🔥 FIXED THEME PROP */}
             <RiskAnalysis theme={isDarkTheme ? 'dark' : 'light'} />
           </div>
@@ -183,13 +210,13 @@ function AppContent() {
 
       case 'fraud-detection':
         return (
-          <div className="space-y-6">
-            <div className={`backdrop-blur-md rounded-xl border p-6 shadow-lg ${
+          <div className="space-y-4 md:space-y-6">
+            <div className={`backdrop-blur-md rounded-xl border p-4 md:p-6 shadow-lg ${
               isDarkTheme 
                 ? 'bg-black/20 border-white/10 text-white' 
                 : 'bg-white/70 border-gray-300/50 text-gray-900 shadow-blue-100/50'
             }`}>
-              <h3 className="text-xl font-semibold mb-4">Fraud Detection Lab</h3>
+              <h3 className="text-lg md:text-xl font-semibold mb-4">Fraud Detection Lab</h3>
               <FraudDetection />
             </div>
           </div>
@@ -197,13 +224,13 @@ function AppContent() {
 
       case 'export':
         return (
-          <div className="space-y-6">
-            <div className={`backdrop-blur-md rounded-xl border p-6 shadow-lg ${
+          <div className="space-y-4 md:space-y-6">
+            <div className={`backdrop-blur-md rounded-xl border p-4 md:p-6 shadow-lg ${
               isDarkTheme 
                 ? 'bg-black/20 border-white/10 text-white' 
                 : 'bg-white/70 border-gray-300/50 text-gray-900 shadow-blue-100/50'
             }`}>
-              <h2 className="text-2xl font-bold mb-6">Export & Reporting</h2>
+              <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Export & Reporting</h2>
               <ExportControls
                 exportFormat={exportFormat}
                 setExportFormat={setExportFormat}
@@ -229,8 +256,13 @@ function AppContent() {
 
       case "activity-map":
         return (
-          <div className="space-y-6">
-            <ActivityMap theme={isDarkTheme ? "dark" : "light"} />
+          <div className="space-y-4 md:space-y-6">
+            <ActivityMap 
+              theme={isDarkTheme ? "dark" : "light"}
+              transactions={transactions}
+              totalTransactions={totalTransactions}
+              overviewStats={overviewStats}
+            />
           </div>
         ) 
         
@@ -240,15 +272,15 @@ function AppContent() {
 
       default:
         return (
-          <div className={`backdrop-blur-md rounded-xl border p-8 text-center shadow-lg ${
+          <div className={`backdrop-blur-md rounded-xl border p-4 md:p-6 lg:p-8 text-center shadow-lg ${
             isDarkTheme 
               ? 'bg-black/20 border-white/10' 
               : 'bg-white/70 border-gray-300/50 shadow-blue-100/50'
           }`}>
-            <h2 className={`text-2xl font-bold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+            <h2 className={`text-xl md:text-2xl font-bold mb-3 md:mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
               {activeSection.replace('-', ' ').toUpperCase()}
             </h2>
-            <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-600'}>
+            <p className={`text-sm md:text-base ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
               This section is under development...
             </p>
           </div>
@@ -261,7 +293,7 @@ function AppContent() {
   }
 
   return (
-    <div className={`flex h-screen relative overflow-hidden transition-colors duration-300 ${
+    <div className={`flex flex-col md:flex-row h-screen relative overflow-hidden transition-colors duration-300 ${
       isDarkTheme 
         ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
@@ -270,11 +302,13 @@ function AppContent() {
         activeSection={activeSection}
         onSectionChange={setActiveSection}
         items={navigationItems}
+        isMobileMenuOpen={isMobileMenuOpen}
+        onMobileMenuClose={() => setIsMobileMenuOpen(false)}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         {renderHeader()}
-        <main className="flex-1 overflow-y-auto p-6">{renderMainContent()}</main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">{renderMainContent()}</main>
       </div>
     </div>
   )

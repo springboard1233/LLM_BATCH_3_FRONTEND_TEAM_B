@@ -11,8 +11,8 @@ import {
   Tooltip,
 } from 'recharts';
 
-const PAGE_SIZE = 15;
-const MAX_RESULTS = 200; // safety cap to avoid loading too much in UI
+const PAGE_SIZE = 100;
+const MAX_RESULTS = 5000; // safety cap to avoid loading too much in UI
 
 // Generate mock transactions with fraud cases
 const generateMockTransactions = (page, limit) => {
@@ -59,26 +59,30 @@ const TransactionManagement = ({ theme = 'dark' }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // pagination state (client-side view)
+  // pagination state - server-side pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalFetched, setTotalFetched] = useState(0);
-  const [hasMorePages, setHasMorePages] = useState(false);
-  const [lastFetchedPage, setLastFetchedPage] = useState(0);
+  const [totalTransactions, setTotalTransactions] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const isDark = theme === 'dark';
 
-  // initial + incremental fetch
+  // Fetch data when page or filter changes
   useEffect(() => {
-    fetchPage(1);
+    fetchPage(currentPage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentPage, filterStatus]);
+
+  const [totalFraudCount, setTotalFraudCount] = useState(0);
+  const [avgTransactionAmount, setAvgTransactionAmount] = useState(0);
+  const [allChannelData, setAllChannelData] = useState([]);
 
   const fetchPage = async (page) => {
     try {
       setLoading(true);
       setError(null);
 
-      const res = await apiService.getPredictionHistory(page, PAGE_SIZE);
+      // Pass filter status to backend
+      const res = await apiService.getPredictionHistory(page, PAGE_SIZE, filterStatus);
 
       const raw =
         res?.items ||
@@ -96,52 +100,38 @@ const TransactionManagement = ({ theme = 'dark' }) => {
         page, 
         count: normalized.length, 
         fraudCount: fraudInBatch,
-        sampleTransaction: normalized[0],
-        rawSample: raw[0]
+        total: res?.total || 0,
+        totalPages: res?.totalPages || 0
       });
 
-      setTransactions((prev) => {
-        if (page === 1) {
-          return normalized.slice(0, MAX_RESULTS);
+      // Set transactions for current page only (server-side pagination)
+      setTransactions(normalized);
+      
+      // Set total count and pages from backend response
+      setTotalTransactions(res?.total || normalized.length);
+      setTotalPages(res?.totalPages || Math.ceil((res?.total || normalized.length) / PAGE_SIZE));
+
+      // Fetch overview stats and channel distribution (only on first page)
+      if (page === 1) {
+        try {
+          const overviewStats = await apiService.getOverviewStats();
+          setTotalFraudCount(overviewStats?.fraud_cases || 0);
+          setAvgTransactionAmount(overviewStats?.avg_transaction_amount || 0);
+          
+          // Fetch channel distribution for all 5000 transactions
+          const channelDist = await apiService.getChannelDistribution();
+          setAllChannelData(channelDist);
+        } catch (err) {
+          console.error('Failed to fetch overview stats:', err);
         }
-
-        const existingIds = new Set(prev.map((txn) => txn.id));
-        const merged = [...prev];
-        normalized.forEach((txn) => {
-          if (!existingIds.has(txn.id)) {
-            merged.push(txn);
-            existingIds.add(txn.id);
-          }
-        });
-        return merged.slice(0, MAX_RESULTS);
-      });
-
-      setTotalFetched((prev) => {
-        if (page === 1) return normalized.length;
-        return Math.min(MAX_RESULTS, prev + normalized.length);
-      });
-
-      setHasMorePages(Boolean(res?.has_next));
-      setLastFetchedPage(page);
+      }
 
     } catch (err) {
       console.error('Failed to fetch transactions:', err);
-      setError('Failed to load prediction history, showing sample data.');
-
-      // Use mock data as final fallback
-      const mockRes = generateMockTransactions(page, PAGE_SIZE);
-      const mockRaw = mockRes?.data || [];
-      const normalized = Array.isArray(mockRaw) ? mockRaw.map(normalizeTransaction) : [];
-      setTransactions((prev) => {
-        if (page === 1) return normalized;
-        return [...prev, ...normalized].slice(0, MAX_RESULTS);
-      });
-      setTotalFetched((prev) => {
-        if (page === 1) return normalized.length;
-        return Math.min(MAX_RESULTS, prev + normalized.length);
-      });
-      setHasMorePages(false);
-      setLastFetchedPage(page);
+      setError('Failed to load prediction history.');
+      setTransactions([]);
+      setTotalTransactions(0);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
@@ -155,12 +145,12 @@ const TransactionManagement = ({ theme = 'dark' }) => {
       t.amount ?? t.transaction_amount ?? t.txn_amount ?? 0;
     const channel = (t.channel || t.txn_channel || 'unknown').toLowerCase();
 
-    // Check for fraud status - prioritize is_fraud boolean field
+    // Check for fraud status - handle both boolean and integer (0/1)
     let isFraud = false;
-    if (typeof t.is_fraud === 'boolean') {
-      isFraud = t.is_fraud;
-    } else if (typeof t.isFraud === 'boolean') {
-      isFraud = t.isFraud;
+    if (t.is_fraud === 1 || t.is_fraud === true) {
+      isFraud = true;
+    } else if (t.isFraud === 1 || t.isFraud === true) {
+      isFraud = true;
     } else if (t.status === 'flagged' || t.status === 'fraud') {
       isFraud = true;
     }
@@ -201,7 +191,7 @@ const TransactionManagement = ({ theme = 'dark' }) => {
     };
   };
 
-  // --- Apply search + status filter ---
+  // --- Apply search filter (status filter is now server-side) ---
   useEffect(() => {
     let data = [...transactions];
 
@@ -214,38 +204,32 @@ const TransactionManagement = ({ theme = 'dark' }) => {
       );
     }
 
-    if (filterStatus !== 'all') {
-      data = data.filter((txn) => {
-        if (filterStatus === 'fraud') {
-          return txn.isFraud === true;
-        }
-        if (filterStatus === 'completed' || filterStatus === 'pending' || filterStatus === 'flagged') {
-          return txn.status === filterStatus;
-        }
-        return false;
-      });
-    }
-
-    console.log('Filter applied:', { filterStatus, totalTransactions: transactions.length, filteredCount: data.length, fraudCount: data.filter(t => t.isFraud).length });
+    console.log('Search filter applied:', { searchTerm, totalTransactions: transactions.length, filteredCount: data.length });
     setFilteredTransactions(data);
+  }, [searchTerm, transactions]);
+
+  // Reset to page 1 when filter status changes
+  useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterStatus, transactions]);
+  }, [filterStatus]);
 
   // --- Derived stats for cards + charts ---
-  const totalCount = filteredTransactions.length;
-  const fraudCount = filteredTransactions.filter((t) => t.isFraud).length;
+  // Use backend totals for header metrics and charts
+  const totalCount = totalTransactions || filteredTransactions.length;
+  const fraudCount = totalFraudCount || filteredTransactions.filter((t) => t.isFraud).length;
   const legitCount = totalCount - fraudCount;
 
+  // Calculate average from current page for display
   const avgAmount =
-    totalCount > 0
+    filteredTransactions.length > 0
       ? filteredTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0) /
-        totalCount
+        filteredTransactions.length
       : 0;
 
   const avgRisk =
-    totalCount > 0
+    filteredTransactions.length > 0
       ? filteredTransactions.reduce((sum, t) => sum + (Number(t.riskScore) || 0), 0) /
-        totalCount
+        filteredTransactions.length
       : 0;
 
   const fraudVsLegitData = [
@@ -253,35 +237,36 @@ const TransactionManagement = ({ theme = 'dark' }) => {
     { label: 'Legit', value: legitCount },
   ];
 
-  const channelCounts = filteredTransactions.reduce((acc, t) => {
-    const ch = t.channel || 'unknown';
-    acc[ch] = (acc[ch] || 0) + 1;
-    return acc;
-  }, {});
-  const channelData = Object.entries(channelCounts).map(([channel, count]) => ({
-    channel,
-    count,
-  }));
+  // Use backend channel data for all 5000 transactions, fallback to current page if not loaded
+  const channelData = allChannelData.length > 0 
+    ? allChannelData 
+    : Object.entries(
+        filteredTransactions.reduce((acc, t) => {
+          const ch = t.channel || 'unknown';
+          acc[ch] = (acc[ch] || 0) + 1;
+          return acc;
+        }, {})
+      ).map(([channel, count]) => ({ channel, count }));
 
-  // --- client-side pagination of filtered list ---
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE) || 1;
-  const pageSlice = filteredTransactions.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
+  // --- Display all filtered transactions (no client-side pagination slice) ---
+  const pageSlice = filteredTransactions;
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (currentPage < totalPages) {
-      setCurrentPage((p) => p + 1);
-    } else if (hasMorePages) {
-      const nextServerPage = lastFetchedPage + 1;
-      await fetchPage(nextServerPage);
       setCurrentPage((p) => p + 1);
     }
   };
 
   const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((p) => p - 1);
+    if (currentPage > 1) {
+      setCurrentPage((p) => p - 1);
+    }
+  };
+
+  const handlePageJump = (pageNum) => {
+    if (pageNum >= 1 && pageNum <= totalPages) {
+      setCurrentPage(pageNum);
+    }
   };
 
   const handleSelectTransaction = (id) => {
@@ -363,7 +348,7 @@ const TransactionManagement = ({ theme = 'dark' }) => {
 
   if (loading && transactions.length === 0) {
     return (
-      <div className={`rounded-2xl p-6 backdrop-blur-lg border ${isDark ? 'bg-black/30 border-white/10' : 'bg-white/80 border-gray-200'}`}>
+      <div className={`rounded-2xl p-4 md:p-6 backdrop-blur-lg border ${isDark ? 'bg-black/30 border-white/10' : 'bg-white/80 border-gray-200'}`}>
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-white/10 rounded-lg" />
           <div className="h-10 bg-white/5 rounded-lg" />
@@ -375,7 +360,7 @@ const TransactionManagement = ({ theme = 'dark' }) => {
 
   if (error) {
     return (
-      <div className={`rounded-2xl p-6 backdrop-blur-lg border ${isDark ? 'bg-black/30 border-red-500/40' : 'bg-red-50 border-red-300'}`}>
+      <div className={`rounded-2xl p-4 md:p-6 backdrop-blur-lg border ${isDark ? 'bg-black/30 border-red-500/40' : 'bg-red-50 border-red-300'}`}>
         <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-red-300' : 'text-red-700'}`}>
           Failed to load transactions
         </h3>
@@ -385,16 +370,16 @@ const TransactionManagement = ({ theme = 'dark' }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header + controls + metrics */}
-      <div className={`rounded-2xl p-6 backdrop-blur-lg border ${isDark ? 'bg-black/30 border-white/10' : 'bg-white/80 border-gray-200'}`}>
+      <div className={`rounded-2xl p-4 md:p-6 backdrop-blur-lg border ${isDark ? 'bg-black/30 border-white/10' : 'bg-white/80 border-gray-200'}`}>
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div>
             <h3 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Transaction Management
             </h3>
             <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm mt-1`}>
-              Explore, filter and export up to 100 recent transactions processed by the fraud engine.
+              Explore, filter and export up to {totalTransactions.toLocaleString()} transactions processed by the fraud engine.
             </p>
           </div>
 
@@ -402,18 +387,18 @@ const TransactionManagement = ({ theme = 'dark' }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
             <MetricPill
               label="Total"
-              value={totalCount}
+              value={totalTransactions.toLocaleString()}
               isDark={isDark}
             />
             <MetricPill
               label="Fraud"
-              value={fraudCount}
+              value={totalFraudCount.toLocaleString()}
               accent="red"
               isDark={isDark}
             />
             <MetricPill
               label="Avg Amount"
-              value={`₹${Math.round(avgAmount).toLocaleString()}`}
+              value={`₹${Math.round(avgTransactionAmount).toLocaleString()}`}
               isDark={isDark}
             />
             <MetricPill
@@ -428,7 +413,7 @@ const TransactionManagement = ({ theme = 'dark' }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-2.5 w-5 h-5 md:w-6 md:h-6 text-gray-400" />
             <input
               type="text"
               placeholder="Search by Transaction ID or Customer ID"
@@ -444,7 +429,7 @@ const TransactionManagement = ({ theme = 'dark' }) => {
 
           {/* Status Filter */}
           <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400" />
+            <Filter className="w-5 h-5 md:w-6 md:h-6 text-gray-400" />
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -468,7 +453,7 @@ const TransactionManagement = ({ theme = 'dark' }) => {
             onClick={exportToCsv}
             className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
           >
-            <Download className="w-5 h-5" />
+            <Download className="w-5 h-5 md:w-6 md:h-6" />
             <span>Export CSV</span>
           </button>
         </div>
@@ -503,7 +488,7 @@ const TransactionManagement = ({ theme = 'dark' }) => {
           {/* Transactions by Channel */}
           <div className={`${isDark ? 'bg-black/40' : 'bg-gray-50'} border border-white/10 rounded-xl p-4`}>
             <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm mb-2`}>
-              Transactions by Channel (filtered)
+              Transactions by Channel (all {totalTransactions.toLocaleString()})
             </p>
             <div className="h-40">
               <ResponsiveContainer width="100%" height="100%">
@@ -639,31 +624,142 @@ const TransactionManagement = ({ theme = 'dark' }) => {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-center gap-3 mt-4">
-        <button
-          disabled={currentPage === 1}
-          onClick={handlePrev}
-          className="px-4 py-2 bg-white/10 text-white rounded-lg disabled:opacity-40"
-        >
-          Previous
-        </button>
+      <div className={`rounded-2xl p-4 backdrop-blur-lg border ${isDark ? 'bg-black/30 border-white/10' : 'bg-white/80 border-gray-200'}`}>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* Page info */}
+          <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+            Showing page {currentPage} of {totalPages} ({totalTransactions.toLocaleString()} total transactions)
+          </div>
 
-        <span className="text-gray-300 text-sm">
-          Page {currentPage} of {totalPages}
-        </span>
+          {/* Pagination controls */}
+          <div className="flex items-center gap-2">
+            <button
+              disabled={currentPage === 1}
+              onClick={handlePrev}
+              className={`px-4 py-2 rounded-lg transition ${
+                currentPage === 1
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : isDark
+                  ? 'bg-white/10 text-white hover:bg-white/20'
+                  : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+              }`}
+            >
+              Previous
+            </button>
 
-        <button
-          disabled={!hasMorePages && currentPage === totalPages}
-          onClick={handleNext}
-          className="px-4 py-2 bg-white/10 text-white rounded-lg disabled:opacity-40"
-        >
-          Next
-        </button>
+            {/* Page number buttons */}
+            <div className="flex items-center gap-1">
+              {/* First page */}
+              {currentPage > 3 && (
+                <>
+                  <button
+                    onClick={() => handlePageJump(1)}
+                    className={`px-3 py-2 rounded-lg text-sm ${
+                      isDark
+                        ? 'bg-white/10 text-white hover:bg-white/20'
+                        : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                    }`}
+                  >
+                    1
+                  </button>
+                  <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>...</span>
+                </>
+              )}
+
+              {/* Current page and neighbors */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+
+                if (pageNum < 1 || pageNum > totalPages) return null;
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageJump(pageNum)}
+                    className={`px-3 py-2 rounded-lg text-sm transition ${
+                      currentPage === pageNum
+                        ? 'bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold'
+                        : isDark
+                        ? 'bg-white/10 text-white hover:bg-white/20'
+                        : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              {/* Last page */}
+              {currentPage < totalPages - 2 && (
+                <>
+                  <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>...</span>
+                  <button
+                    onClick={() => handlePageJump(totalPages)}
+                    className={`px-3 py-2 rounded-lg text-sm ${
+                      isDark
+                        ? 'bg-white/10 text-white hover:bg-white/20'
+                        : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                    }`}
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+            </div>
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={handleNext}
+              className={`px-4 py-2 rounded-lg transition ${
+                currentPage === totalPages
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : isDark
+                  ? 'bg-white/10 text-white hover:bg-white/20'
+                  : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+
+          {/* Quick jump */}
+          <div className="flex items-center gap-2">
+            <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              Go to:
+            </span>
+            <input
+              type="number"
+              min="1"
+              max={totalPages}
+              value={currentPage}
+              onChange={(e) => {
+                const page = parseInt(e.target.value);
+                if (!isNaN(page)) {
+                  handlePageJump(page);
+                }
+              }}
+              className={`w-20 px-3 py-2 rounded-lg border text-sm ${
+                isDark
+                  ? 'bg-gray-800 border-gray-700 text-white'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
+            />
+          </div>
+        </div>
       </div>
 
       {detailsModalTxn && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
-          <div className={`max-w-2xl w-full rounded-2xl p-6 relative border ${isDark ? 'bg-slate-900 border-white/10 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
+          <div className={`max-w-2xl w-full rounded-2xl p-4 md:p-6 relative border ${isDark ? 'bg-slate-900 border-white/10 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
             <button
               className="absolute top-4 right-4 text-sm text-gray-400 hover:text-gray-200"
               onClick={() => setDetailsModalTxn(null)}

@@ -7,8 +7,10 @@ import { TransactionTable } from '../components/TransactionTable';
 import { TransactionDetailsModal } from '../components/TransactionDetailsModal';
 import type { Transaction } from '../lib/types';
 import { Download, RefreshCw } from 'lucide-react';
+import useResponsive from '../hooks/useResponsive';
 
 export const DashboardPage = () => {
+  const { isMobile } = useResponsive();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -101,29 +103,33 @@ export const DashboardPage = () => {
 
       <RecommendationsPanel />
 
-      <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-1">Transaction Management</h2>
+      <div className="bg-slate-800 rounded-lg border border-slate-700 p-4 md:p-6">
+        <div className={`flex items-center justify-between mb-4 md:mb-6 ${isMobile ? 'flex-col gap-4' : ''}`}>
+          <div className={isMobile ? 'w-full' : ''}>
+            <h2 className={`font-bold text-white mb-1 ${isMobile ? 'text-xl' : 'text-2xl'}`}>Transaction Management</h2>
             <p className="text-slate-400 text-sm">
               Showing {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className={`flex gap-2 md:gap-3 ${isMobile ? 'w-full' : ''}`}>
             <button
               onClick={loadTransactions}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+              className={`flex items-center justify-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors min-h-[44px] ${
+                isMobile ? 'flex-1' : ''
+              }`}
             >
               <RefreshCw className="w-4 h-4" />
-              Refresh
+              {!isMobile && <span>Refresh</span>}
             </button>
             <button
               onClick={handleExport}
               disabled={transactions.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+              className={`flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors min-h-[44px] ${
+                isMobile ? 'flex-1' : ''
+              }`}
             >
               <Download className="w-4 h-4" />
-              Export CSV
+              <span>{isMobile ? 'Export' : 'Export CSV'}</span>
             </button>
           </div>
         </div>

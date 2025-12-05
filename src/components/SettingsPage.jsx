@@ -39,7 +39,7 @@ const SettingsPage = () => {
         {/* Appearance Settings */}
         <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
           <div className="flex items-center mb-6">
-            <Palette className="w-6 h-6 text-blue-400 mr-3" />
+            <Palette className="w-5 h-5 md:w-6 md:h-6 text-blue-400 mr-3" />
             <h2 className="text-xl font-semibold text-white">Appearance</h2>
           </div>
           
@@ -105,7 +105,7 @@ const SettingsPage = () => {
         {/* Language & Localization */}
         <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
           <div className="flex items-center mb-6">
-            <Languages className="w-6 h-6 text-green-400 mr-3" />
+            <Languages className="w-5 h-5 md:w-6 md:h-6 text-green-400 mr-3" />
             <h2 className="text-xl font-semibold text-white">Language & Localization</h2>
           </div>
           

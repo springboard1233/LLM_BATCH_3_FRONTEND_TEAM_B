@@ -2,18 +2,19 @@ import { useMemo } from 'react'
 import { TrendingUp, TrendingDown, DollarSign, Users, Shield, AlertTriangle } from 'lucide-react'
 import { useTranslation } from './src/hooks/useTranslation'
 
-export default function QuickStats({ transactions = [] }) {
+export default function QuickStats({ transactions = [], totalTransactions = 0, overviewStats = null }) {
   const { t } = useTranslation()
   const stats = useMemo(() => {
-    const total = transactions.length
-    const fraudCount = transactions.filter(t => t.status === 'Fraud').length
-    const legitimateCount = transactions.filter(t => t.status === 'Legitimate' || t.status === 'Safe').length
-    const totalAmount = transactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+    // Use backend stats if available
+    const total = totalTransactions > 0 ? totalTransactions : transactions.length
+    const fraudCount = overviewStats?.fraud_cases || transactions.filter(t => t.status === 'Fraud').length
+    const legitimateCount = overviewStats?.non_fraud_cases || transactions.filter(t => t.status === 'Legitimate' || t.status === 'Safe').length
+    const totalAmount = overviewStats?.total_amount || transactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
     const fraudAmount = transactions.filter(t => t.status === 'Fraud').reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
     const uniqueCustomers = new Set(transactions.map(t => t.customerId || t.customer_id)).size
     
-    const fraudRate = total > 0 ? (fraudCount / total * 100) : 0
-    const avgTransactionAmount = total > 0 ? (totalAmount / total) : 0
+    const fraudRate = overviewStats?.fraud_percentage || (total > 0 ? (fraudCount / total * 100) : 0)
+    const avgTransactionAmount = overviewStats?.avg_transaction_amount || (total > 0 ? (totalAmount / total) : 0)
     const fraudLossRate = totalAmount > 0 ? (fraudAmount / totalAmount * 100) : 0
 
     return {
@@ -27,7 +28,7 @@ export default function QuickStats({ transactions = [] }) {
       uniqueCustomers,
       fraudLossRate: fraudLossRate.toFixed(1)
     }
-  }, [transactions])
+  }, [transactions, totalTransactions, overviewStats])
 
   const quickStatsItems = [
     {
@@ -62,8 +63,8 @@ export default function QuickStats({ transactions = [] }) {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-      <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('dashboard.quickStats', 'Quick Stats')}</h3>
-      <div className="grid grid-cols-2 gap-3">
+      <h3 className="text-sm md:text-base font-semibold text-gray-900 mb-3">{t('dashboard.quickStats', 'Quick Stats')}</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {quickStatsItems.map((item, index) => {
           const Icon = item.icon
           return (
@@ -72,7 +73,7 @@ export default function QuickStats({ transactions = [] }) {
                 <Icon className={`w-4 h-4 ${item.color}`} />
                 <span className="text-xs font-medium text-gray-600">{item.label}</span>
               </div>
-              <div className={`text-lg font-bold ${item.color} mt-1`}>
+              <div className={`text-base md:text-lg font-bold ${item.color} mt-1`}>
                 {item.value}
               </div>
             </div>
@@ -82,7 +83,7 @@ export default function QuickStats({ transactions = [] }) {
       
       {/* Additional Insights */}
       <div className="mt-4 pt-3 border-t border-gray-200">
-        <div className="flex items-center justify-between text-xs text-gray-600">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-0 text-xs text-gray-600">
           <span>{t('dashboard.avgTransaction', 'Avg Transaction')}: ${stats.avgTransactionAmount}</span>
           <span>{t('dashboard.lossRate', 'Loss Rate')}: {stats.fraudLossRate}%</span>
         </div>

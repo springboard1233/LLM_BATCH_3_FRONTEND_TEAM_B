@@ -1,21 +1,28 @@
 import { useMemo } from 'react'
 import { TrendingUp, TrendingDown, AlertTriangle, Shield, DollarSign, Users, Activity, Target } from 'lucide-react'
 import { useTranslation } from './src/hooks/useTranslation'
+import useResponsive from './src/hooks/useResponsive'
 
-export default function KeyPerformanceIndicators({ transactions = [] }) {
+export default function KeyPerformanceIndicators({ transactions = [], totalTransactions = 0, overviewStats = null }) {
   const { t } = useTranslation()
+  const { isMobile } = useResponsive()
   
   const kpiMetrics = useMemo(() => {
-    const total = transactions.length
-    const fraudCount = transactions.filter(t => t.status === 'Fraud').length
-    const safeCount = transactions.filter(t => t.status === 'Legitimate' || t.status === 'Safe').length
-    const totalAmount = transactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+    // Use totalTransactions from backend if available, otherwise use transactions.length
+    const total = totalTransactions > 0 ? totalTransactions : transactions.length
+    
+    // Use backend stats if available
+    const fraudCount = overviewStats?.fraud_cases || transactions.filter(t => t.status === 'Fraud').length
+    const safeCount = overviewStats?.non_fraud_cases || transactions.filter(t => t.status === 'Legitimate' || t.status === 'Safe').length
+    
+    const totalAmount = overviewStats?.total_amount || transactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
     const fraudAmount = transactions.filter(t => t.status === 'Fraud').reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
     const uniqueCustomers = new Set(transactions.map(t => t.customerId || t.customer_id)).size
     
-    const fraudRate = total > 0 ? (fraudCount / total * 100) : 0
-    const avgTransactionAmount = total > 0 ? (totalAmount / total) : 0
-    const safeRate = total > 0 ? (safeCount / total * 100) : 0
+    const fraudRate = overviewStats?.fraud_percentage || (total > 0 ? (fraudCount / total * 100) : 0)
+    // Use backend average if available, otherwise calculate from current page
+    const avgTransactionAmount = overviewStats?.avg_transaction_amount || (transactions.length > 0 ? (totalAmount / transactions.length) : 0)
+    const safeRate = overviewStats?.non_fraud_percentage || (total > 0 ? (safeCount / total * 100) : 0)
     
     // Calculate trends (simulated for demo)
     const trends = {
@@ -48,7 +55,7 @@ export default function KeyPerformanceIndicators({ transactions = [] }) {
       trends,
       trendValues
     }
-  }, [transactions])
+  }, [transactions, totalTransactions, overviewStats])
 
   const kpiItems = [
     {
@@ -135,15 +142,15 @@ export default function KeyPerformanceIndicators({ transactions = [] }) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">{t('kpi.title', 'Key Performance Indicators')}</h3>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 md:mb-6 gap-2">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900">{t('kpi.title', 'Key Performance Indicators')}</h3>
         <div className="text-xs text-gray-500">
           {t('kpi.lastUpdated', 'Last updated')}: {new Date().toLocaleTimeString()}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {kpiItems.map((item) => {
           const Icon = item.icon
           const TrendIcon = getTrendIcon(item.trend)
@@ -156,10 +163,10 @@ export default function KeyPerformanceIndicators({ transactions = [] }) {
             >
               <div className="flex items-center justify-between mb-3">
                 <div className={`p-2 bg-white rounded-lg shadow-sm`}>
-                  <Icon className={`w-5 h-5 ${item.iconColor}`} />
+                  <Icon className={`w-4 h-4 md:w-5 md:h-5 ${item.iconColor}`} />
                 </div>
                 <div className="flex items-center space-x-1">
-                  <TrendIcon className={`w-4 h-4 ${getTrendColor(item.trend, isGoodWhenUp)}`} />
+                  <TrendIcon className={`w-3 h-3 md:w-4 md:h-4 ${getTrendColor(item.trend, isGoodWhenUp)}`} />
                   <span className={`text-xs font-medium ${getTrendColor(item.trend, isGoodWhenUp)}`}>
                     {item.trendValue}%
                   </span>
@@ -167,10 +174,10 @@ export default function KeyPerformanceIndicators({ transactions = [] }) {
               </div>
               
               <div className="space-y-1">
-                <div className={`text-2xl font-bold ${item.iconColor}`}>
+                <div className={`text-xl md:text-2xl font-bold ${item.iconColor}`}>
                   {item.value}
                 </div>
-                <div className="text-sm font-medium text-gray-600">
+                <div className="text-xs md:text-sm font-medium text-gray-600">
                   {item.label}
                 </div>
               </div>
@@ -180,22 +187,22 @@ export default function KeyPerformanceIndicators({ transactions = [] }) {
       </div>
 
       {/* Summary Row */}
-      <div className="mt-6 pt-4 border-t border-gray-200">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+      <div className="mt-4 md:mt-6 pt-3 md:pt-4 border-t border-gray-200">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
           <div>
-            <div className="text-lg font-bold text-blue-600">{kpiMetrics.totalTransactions}</div>
+            <div className="text-base md:text-lg font-bold text-blue-600">{kpiMetrics.totalTransactions}</div>
             <div className="text-xs text-gray-500">{t('kpi.totalProcessed', 'Total Processed')}</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-green-600">{kpiMetrics.safeRate}%</div>
+            <div className="text-base md:text-lg font-bold text-green-600">{kpiMetrics.safeRate}%</div>
             <div className="text-xs text-gray-500">{t('kpi.successRate', 'Success Rate')}</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-purple-600">${kpiMetrics.avgTransactionAmount}</div>
+            <div className="text-base md:text-lg font-bold text-purple-600">${kpiMetrics.avgTransactionAmount}</div>
             <div className="text-xs text-gray-500">{t('kpi.avgValue', 'Avg Value')}</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-indigo-600">{kpiMetrics.uniqueCustomers}</div>
+            <div className="text-base md:text-lg font-bold text-indigo-600">{kpiMetrics.uniqueCustomers}</div>
             <div className="text-xs text-gray-500">{t('kpi.activeUsers', 'Active Users')}</div>
           </div>
         </div>

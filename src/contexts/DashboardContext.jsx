@@ -9,6 +9,7 @@ const ACTIONS = {
   SET_ERROR: 'SET_ERROR',
   SET_OVERVIEW_STATS: 'SET_OVERVIEW_STATS',
   SET_TRANSACTIONS: 'SET_TRANSACTIONS',
+  SET_TOTAL_TRANSACTIONS: 'SET_TOTAL_TRANSACTIONS',
   SET_SUSPICIOUS_TRANSACTIONS: 'SET_SUSPICIOUS_TRANSACTIONS',
   SET_FRAUD_TRENDS: 'SET_FRAUD_TRENDS',
   SET_TRANSACTION_INSIGHTS: 'SET_TRANSACTION_INSIGHTS',
@@ -21,6 +22,9 @@ const ACTIONS = {
 const initialState = {
   overviewStats: null,
   transactions: [],
+  totalTransactions: 0,
+  avgTransactionAmount: 0,
+  totalAmount: 0,
   suspiciousTransactions: [],
   fraudTrends: [],
   transactionInsights: null,
@@ -42,6 +46,8 @@ function dashboardReducer(state, action) {
       return { ...state, overviewStats: action.payload };
     case ACTIONS.SET_TRANSACTIONS:
       return { ...state, transactions: action.payload };
+    case ACTIONS.SET_TOTAL_TRANSACTIONS:
+      return { ...state, totalTransactions: action.payload };
     case ACTIONS.SET_SUSPICIOUS_TRANSACTIONS:
       return { ...state, suspiciousTransactions: action.payload };
     case ACTIONS.SET_FRAUD_TRENDS:
@@ -79,6 +85,13 @@ export function DashboardProvider({ children }) {
       setLoading(true);
       const data = await apiService.getOverviewStats();
       dispatch({ type: ACTIONS.SET_OVERVIEW_STATS, payload: data });
+      
+      // Also store avg amount and total amount in state
+      if (data.avg_transaction_amount !== undefined) {
+        dispatch({ type: ACTIONS.SET_TOTAL_TRANSACTIONS, payload: data.total_records || 0 });
+        // Store additional metrics in overviewStats for now
+      }
+      
       setError(null);
     } catch (error) {
       setError(error.message);
@@ -91,8 +104,14 @@ export function DashboardProvider({ children }) {
   const loadTransactions = useCallback(async (page = 1, filters = {}) => {
     try {
       setLoading(true);
-      const response = await apiService.getTransactions(page, 10, filters);
-      console.log('API Response in Context:', response);
+      // Fetch 100 transactions per page for better user experience
+      const response = await apiService.getTransactions(page, 100, filters);
+      console.log('✅ DashboardContext - API Response:', {
+        total: response.total,
+        totalPages: response.totalPages,
+        currentPage: response.currentPage,
+        dataLength: response.data?.length
+      });
       
       // Make sure we're dispatching the correct data structure
       dispatch({ 
@@ -100,13 +119,18 @@ export function DashboardProvider({ children }) {
         payload: Array.isArray(response) ? response : response.data || [] 
       });
       
+      // Store total transaction count from backend
+      const totalCount = response.total || response.data?.length || 0;
+      console.log('✅ DashboardContext - Setting totalTransactions to:', totalCount);
+      dispatch({ type: ACTIONS.SET_TOTAL_TRANSACTIONS, payload: totalCount });
+      
       // Update pagination if available
       if (response.totalPages) {
         dispatch({ type: ACTIONS.SET_TOTAL_PAGES, payload: response.totalPages });
       }
       setError(null);
     } catch (error) {
-      console.error('Error loading transactions:', error);
+      console.error('❌ Error loading transactions:', error);
       setError(error.message);
     } finally {
       setLoading(false);

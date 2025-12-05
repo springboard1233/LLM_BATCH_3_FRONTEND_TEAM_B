@@ -23,7 +23,7 @@ function Sidebar({ currentPage, setCurrentPage }) {
       <nav className={`fixed sm:static w-64 h-full bg-gray-800 transform transition-transform duration-200 z-30
         ${isOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`}>
         <div className="p-4">
-          <h1 className="text-xl font-bold mb-8">Dashboard</h1>
+          <h1 className="text-lg md:text-xl font-bold mb-6 md:mb-8">Dashboard</h1>
           <ul className="space-y-2">
             {navItems.map(item => (
               <li key={item}>
@@ -32,7 +32,7 @@ function Sidebar({ currentPage, setCurrentPage }) {
                     setCurrentPage(item)
                     setIsOpen(false)
                   }}
-                  className={`w-full text-left px-4 py-2 rounded-lg transition-colors
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors min-h-[44px] text-sm md:text-base
                     ${currentPage === item ? 'bg-blue-600 text-white' : 'hover:bg-gray-700'}`}
                 >
                   {item}

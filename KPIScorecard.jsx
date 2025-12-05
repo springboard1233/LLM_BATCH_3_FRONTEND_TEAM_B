@@ -11,7 +11,7 @@ const MetricCard = ({ title, value, change, trend, icon: Icon, color = 'blue' })
   }
 
   return (
-    <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6 hover:bg-black/30 transition-all duration-200">
+    <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-4 md:p-6 hover:bg-black/30 transition-all duration-200">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
