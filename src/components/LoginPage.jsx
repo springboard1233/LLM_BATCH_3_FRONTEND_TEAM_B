@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Shield, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { apiService } from '../services/api'; // ✅ use same central API helper
 
 const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -36,15 +38,18 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
 
       // apiService.loginRequest() already:
       // - calls /auth/login
-      // - stores { access_token, user } in localStorage
+      // - stores user in localStorage
       // We just notify the parent app:
       if (onLogin && response?.user) {
         onLogin({
           email: response.user.email,
-          name: response.user.name || response.user.email.split('@')[0],
-          role: 'Admin User', // or response.user.role if you add it later
+          name: response.user.full_name || response.user.email.split('@')[0],
+          role: response.user.role || 'analyst',
         });
       }
+      
+      // Navigate to dashboard after successful login
+      navigate('/dashboard');
     } catch (err) {
       console.error('Login failed:', err);
       setError(err?.message || 'Failed to sign in. Please try again.');
@@ -58,8 +63,8 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
       <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-2xl mb-4">
-            <Shield className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-2xl mb-4">
+            <Shield className="w-8 h-8 md:w-10 md:h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">SecureGuard AI</h1>
           <p className="text-gray-400">Fraud Detection System</p>
@@ -71,7 +76,7 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
 
           {error && (
             <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-300">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <AlertCircle className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
           )}
@@ -83,7 +88,7 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-gray-400" />
                 <input
                   type="email"
                   value={formData.email}
@@ -101,7 +106,7 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
@@ -115,7 +120,7 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-5 h-5 md:w-6 md:h-6" /> : <Eye className="w-5 h-5 md:w-6 md:h-6" />}
                 </button>
               </div>
             </div>
@@ -200,7 +205,13 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
               Don&apos;t have an account?{' '}
               <button
                 type="button"
-                onClick={onSwitchToSignup}
+                onClick={() => {
+                  if (onSwitchToSignup) {
+                    onSwitchToSignup();
+                  } else {
+                    navigate('/register');
+                  }
+                }}
                 className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
               >
                 Sign up

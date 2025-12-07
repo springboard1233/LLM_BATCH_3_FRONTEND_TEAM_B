@@ -69,7 +69,7 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
     filters.kycStatus.length > 0
 
   return (
-    <div className={`rounded-xl shadow-sm border p-6 ${
+    <div className={`rounded-xl shadow-sm border p-4 md:p-6 ${
       isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
     }`}>
       <div className="flex items-center justify-between mb-4">
@@ -77,7 +77,7 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="flex items-center space-x-1 text-sm text-red-600 hover:text-red-800 transition-colors"
+            className="flex items-center space-x-1 px-3 py-2 text-sm text-red-600 hover:text-red-800 transition-colors rounded-lg hover:bg-red-50 min-h-[44px]"
           >
             <X className="w-4 h-4" />
             <span>Clear All</span>
@@ -103,7 +103,7 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
       <div className="flex items-center space-x-3 mb-4">
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`flex items-center space-x-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors min-h-[44px] ${
             showFilters ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -116,7 +116,7 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
           <select
             value={filters.status.length === 1 ? filters.status[0] : ''}
             onChange={(e) => handleFilterChange('status', e.target.value ? [e.target.value] : [])}
-            className={`text-sm border rounded px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`text-sm border rounded px-3 py-2.5 min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
               isDarkTheme 
                 ? 'bg-gray-700 border-gray-600 text-white' 
                 : 'bg-white border-gray-300 text-gray-900'
@@ -134,7 +134,7 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
           <select
             value={filters.channels.length === 1 ? filters.channels[0] : ''}
             onChange={(e) => handleFilterChange('channels', e.target.value ? [e.target.value] : [])}
-            className={`text-sm border rounded px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`text-sm border rounded px-3 py-2.5 min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
               isDarkTheme 
                 ? 'bg-gray-700 border-gray-600 text-white' 
                 : 'bg-white border-gray-300 text-gray-900'
@@ -153,16 +153,16 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Status</label>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {filterOptions.statuses.map(status => (
-                  <label key={status} className="flex items-center">
+                  <label key={status} className="flex items-center min-h-[44px] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={filters.status.includes(status)}
                       onChange={() => handleMultiSelectChange('status', status)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5 cursor-pointer"
                     />
-                    <span className={`ml-2 text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{status}</span>
+                    <span className={`ml-3 text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{status}</span>
                   </label>
                 ))}
               </div>
@@ -170,16 +170,16 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
 
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Channels</label>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {filterOptions.channels.map(channel => (
-                  <label key={channel} className="flex items-center">
+                  <label key={channel} className="flex items-center min-h-[44px] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={filters.channels.includes(channel)}
                       onChange={() => handleMultiSelectChange('channels', channel)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5 cursor-pointer"
                     />
-                    <span className={`ml-2 text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{channel}</span>
+                    <span className={`ml-3 text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{channel}</span>
                   </label>
                 ))}
               </div>
@@ -190,12 +190,12 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
                 <Calendar className="w-4 h-4 inline mr-1" />
                 Date Range
               </label>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <input
                   type="date"
                   value={filters.dateRange.start}
                   onChange={(e) => handleFilterChange('dateRange', { ...filters.dateRange, start: e.target.value })}
-                  className={`w-full text-sm border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full text-sm border rounded px-3 py-3 min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     isDarkTheme 
                       ? 'bg-gray-700 border-gray-600 text-white [color-scheme:dark]' 
                       : 'bg-white border-gray-300 text-gray-900'
@@ -206,7 +206,7 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
                   type="date"
                   value={filters.dateRange.end}
                   onChange={(e) => handleFilterChange('dateRange', { ...filters.dateRange, end: e.target.value })}
-                  className={`w-full text-sm border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full text-sm border rounded px-3 py-3 min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     isDarkTheme 
                       ? 'bg-gray-700 border-gray-600 text-white [color-scheme:dark]' 
                       : 'bg-white border-gray-300 text-gray-900'
@@ -221,12 +221,12 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
                 <DollarSign className="w-4 h-4 inline mr-1" />
                 Amount Range
               </label>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <input
                   type="number"
                   value={filters.amountRange.min}
                   onChange={(e) => handleFilterChange('amountRange', { ...filters.amountRange, min: e.target.value })}
-                  className={`w-full text-sm border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full text-sm border rounded px-3 py-3 min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     isDarkTheme 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                       : 'bg-white border-gray-300 text-gray-900'
@@ -237,7 +237,7 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
                   type="number"
                   value={filters.amountRange.max}
                   onChange={(e) => handleFilterChange('amountRange', { ...filters.amountRange, max: e.target.value })}
-                  className={`w-full text-sm border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full text-sm border rounded px-3 py-3 min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     isDarkTheme 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                       : 'bg-white border-gray-300 text-gray-900'
@@ -250,16 +250,16 @@ export default function SearchFilterBar({ onFilterChange, transactions = [] }) {
 
           <div>
             <label className={`block text-sm font-medium mb-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>KYC Status</label>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-6">
               {filterOptions.kycStatuses.map(status => (
-                <label key={status} className="flex items-center">
+                <label key={status} className="flex items-center min-h-[44px] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={filters.kycStatus.includes(status)}
                     onChange={() => handleMultiSelectChange('kycStatus', status)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5 cursor-pointer"
                   />
-                  <span className={`ml-2 text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{status}</span>
+                  <span className={`ml-3 text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{status}</span>
                 </label>
               ))}
             </div>

@@ -41,11 +41,11 @@ const ThemeSelector = () => {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-        <Sun className="w-5 h-5 mr-2" />
+      <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center">
+        <Sun className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
         Theme
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {themeOptions.map((option) => {
           const IconComponent = getThemeIcon(option.icon)
           const colors = themePreviewColors[option.value]
@@ -55,10 +55,10 @@ const ThemeSelector = () => {
             <button
               key={option.value}
               onClick={() => updateTheme(option.value)}
-              className={`relative p-4 rounded-lg border transition-all duration-200 ${
+              className={`relative p-3 sm:p-4 rounded-lg border transition-all duration-200 min-h-[100px] sm:min-h-[120px] ${
                 isSelected
                   ? 'border-blue-500 bg-blue-500/20 ring-2 ring-blue-500/30'
-                  : 'border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30'
+                  : 'border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 active:bg-white/15'
               }`}
               aria-pressed={isSelected}
               aria-label={`Select ${option.label} theme`}

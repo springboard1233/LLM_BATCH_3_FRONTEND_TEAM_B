@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Shield, Mail, Lock, User, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { apiService } from '../services/api'; // ✅ connect to backend
 
 const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -61,7 +63,8 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
 
     try {
       // ------------------------------
-      // 1️⃣ SIGNUP CALL → /api/auth/signup
+      // SIGNUP CALL → /api/auth/register
+      // signupRequest already stores user in localStorage
       // ------------------------------
       const signupRes = await apiService.signupRequest({
         name: formData.name,
@@ -69,23 +72,17 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
         password: formData.password,
       });
 
-      // Auto login after successful signup
-      // ------------------------------
-      // 2️⃣ LOGIN CALL → /api/auth/login
-      // ------------------------------
-      const loginRes = await apiService.loginRequest({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      // Notify parent (kept exactly same)
-      if (onSignup) {
+      // Notify parent
+      if (onSignup && signupRes?.user) {
         onSignup({
-          email: loginRes?.user?.email,
-          name: loginRes?.user?.name || formData.name,
-          role: 'User',
+          email: signupRes.user.email,
+          name: signupRes.user.full_name || formData.name,
+          role: signupRes.user.role || 'User',
         });
       }
+
+      // Navigate to dashboard after successful signup
+      navigate('/dashboard');
 
     } catch (err) {
       console.error('Signup error:', err);
@@ -109,8 +106,8 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
 
         {/* Logo and Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-2xl mb-4">
-            <Shield className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-2xl mb-4">
+            <Shield className="w-8 h-8 md:w-10 md:h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">SecureGuard AI</h1>
           <p className="text-gray-400">Create your account</p>
@@ -122,7 +119,7 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
 
           {error && (
             <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-300">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <AlertCircle className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
           )}
@@ -133,7 +130,7 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-gray-400" />
                 <input
                   type="text"
                   value={formData.name}
@@ -149,7 +146,7 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-gray-400" />
                 <input
                   type="email"
                   value={formData.email}
@@ -165,7 +162,7 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
@@ -198,7 +195,7 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-gray-400" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
@@ -212,7 +209,7 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5 md:w-6 md:h-6" /> : <Eye className="w-5 h-5 md:w-6 md:h-6" />}
                 </button>
               </div>
             </div>
@@ -271,7 +268,13 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
               Already have an account?{' '}
               <button
                 type="button"
-                onClick={onSwitchToLogin}
+                onClick={() => {
+                  if (onSwitchToLogin) {
+                    onSwitchToLogin();
+                  } else {
+                    navigate('/login');
+                  }
+                }}
                 className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
               >
                 Sign in

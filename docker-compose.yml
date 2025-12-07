@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # Frontend React Application
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fraud-dashboard-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000/api}
+    restart: unless-stopped
+    networks:
+      - fraud-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Backend API (uncomment if you want to run backend in Docker)
+  # backend:
+  #   build:
+  #     context: ../LLM_BATCH_3_BACKEND_TEAM_B
+  #     dockerfile: Dockerfile
+  #   container_name: fraud-dashboard-backend
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - MONGODB_URL=${MONGODB_URL:-mongodb://mongodb:27017}
+  #     - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+  #   depends_on:
+  #     - mongodb
+  #     - redis
+  #   networks:
+  #     - fraud-network
+  #   restart: unless-stopped
+
+  # Optional: MongoDB (uncomment if needed)
+  # mongodb:
+  #   image: mongo:7
+  #   container_name: fraud-dashboard-mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #   networks:
+  #     - fraud-network
+  #   restart: unless-stopped
+
+  # Optional: Redis (uncomment if needed)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: fraud-dashboard-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   command: redis-server --appendonly yes
+  #   networks:
+  #     - fraud-network
+  #   restart: unless-stopped
+
+networks:
+  fraud-network:
+    driver: bridge
+
+# volumes:
+#   mongodb_data:
+#   redis_data:
+

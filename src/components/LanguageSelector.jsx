@@ -10,8 +10,8 @@ const LanguageSelector = () => {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-        <Globe className="w-5 h-5 mr-2" />
+      <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center">
+        <Globe className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
         {t('settings.language')}
       </h3>
       
@@ -19,7 +19,7 @@ const LanguageSelector = () => {
         <select
           value={language}
           onChange={(e) => updateLanguage(e.target.value)}
-          className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer pr-10"
+          className="w-full p-3 sm:p-3.5 text-base bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer pr-10 min-h-[44px]"
           aria-label={t('settings.language')}
         >
           {supportedLanguages.map((lang) => (

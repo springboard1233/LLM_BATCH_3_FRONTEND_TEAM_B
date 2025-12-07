@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { ChevronUp, ChevronDown, Search, Download, Eye } from 'lucide-react'
 import { useSettings } from './src/contexts/SettingsContext'
 
-export default function TransactionTable({ transactions = [], isLoading = false, error = null }) {
+export default function TransactionTable({ transactions = [], isLoading = false, error = null, totalCount = null }) {
   const { effectiveTheme } = useSettings();
   const isDarkTheme = effectiveTheme === 'dark';
   const [sortField, setSortField] = useState('date')
@@ -47,7 +47,8 @@ export default function TransactionTable({ transactions = [], isLoading = false,
     return filtered
   }, [transactions, sortField, sortDirection, searchTerm])
 
-  const totalPages = Math.ceil(processedTransactions.length / pageSize)
+  // Use totalCount if provided (for server-side pagination), otherwise calculate from processed transactions
+  const totalPages = totalCount ? Math.ceil(totalCount / pageSize) : Math.ceil(processedTransactions.length / pageSize)
   const startIndex = (currentPage - 1) * pageSize
   const paginatedTransactions = processedTransactions.slice(startIndex, startIndex + pageSize)
 
@@ -61,10 +62,10 @@ export default function TransactionTable({ transactions = [], isLoading = false,
   }
 
   const SortIcon = ({ field }) => {
-    if (sortField !== field) return <ChevronUp className="w-4 h-4 text-gray-400" />
+    if (sortField !== field) return <ChevronUp className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
     return sortDirection === 'asc' ?
-      <ChevronUp className="w-4 h-4 text-blue-600" /> :
-      <ChevronDown className="w-4 h-4 text-blue-600" />
+      <ChevronUp className="w-4 h-4 md:w-5 md:h-5 text-blue-600" /> :
+      <ChevronDown className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
   }
 
   const getStatusBadge = (status) => {
@@ -114,7 +115,7 @@ export default function TransactionTable({ transactions = [], isLoading = false,
           <h3 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Transaction Details</h3>
           <div className="flex items-center space-x-3">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="w-4 h-4 md:w-5 md:h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search transactions..."
@@ -132,7 +133,7 @@ export default function TransactionTable({ transactions = [], isLoading = false,
                 ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' 
                 : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
             }`}>
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 md:w-5 md:h-5" />
               <span>Export</span>
             </button>
           </div>
@@ -284,7 +285,7 @@ export default function TransactionTable({ transactions = [], isLoading = false,
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <button className="text-blue-600 hover:text-blue-800 transition-colors">
-                      <Eye className="w-4 h-4" />
+                      <Eye className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                   </td>
                 </tr>
@@ -318,7 +319,12 @@ export default function TransactionTable({ transactions = [], isLoading = false,
               <option value={100}>100</option>
             </select>
             <span className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
-              of {processedTransactions.length} transactions
+              of {totalCount !== null ? totalCount : processedTransactions.length} transactions
+              {totalCount !== null && totalCount > processedTransactions.length && (
+                <span className="ml-1 text-xs text-blue-500">
+                  (showing {processedTransactions.length})
+                </span>
+              )}
             </span>
           </div>
 

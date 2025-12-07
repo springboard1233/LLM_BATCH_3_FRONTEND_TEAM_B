@@ -20,7 +20,7 @@ export const LoginPage = () => {
       await login(email, password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to sign in');
+      setError(err?.message || err?.response?.data?.detail || 'Failed to sign in');
     } finally {
       setLoading(false);
     }

@@ -1,0 +1,83 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist
+build
+.vite
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Testing
+coverage
+.nyc_output
+*.test.js
+*.test.jsx
+*.test.ts
+*.test.tsx
+__tests__
+*.spec.js
+*.spec.jsx
+
+# Documentation
+README.md
+*.md
+docs
+
+# Docker files (don't copy docker files into docker)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Logs
+logs
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# Backend folder (if exists in frontend repo)
+LLM_BATCH_3_BACKEND_TEAM_B
+
+# Virtual environments
+venv
+.venv
+
+# Backup files
+*.backup
+*.bak
+*.minimal.*
+
