@@ -16,7 +16,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
+      // Simple auth - clear user from localStorage
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -28,7 +29,14 @@ export const authAPI = {
     api.post('/auth/register', data),
   login: (data: { email: string; password: string }) =>
     api.post('/auth/login', data),
-  getMe: () => api.get('/auth/me'),
+  getMe: () => {
+    // Simple auth - send user_id as query param
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!user || !user.id) {
+      return Promise.reject(new Error('No user found'));
+    }
+    return api.get(`/auth/me?user_id=${user.id}`);
+  },
   logout: () => api.post('/auth/logout'),
 };
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Shield, Eye, Lock, Cpu, Database, AlertTriangle, TrendingUp, CheckCircle, ArrowRight, Play, Pause, BarChart3, Activity, Layers, Zap, Brain, Users, Clock } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 
 const LandingPage = ({ onGetStarted }) => {
+  const navigate = useNavigate();
   const { effectiveTheme } = useSettings();
   const isDarkTheme = effectiveTheme === 'dark';
   const [isAnimating, setIsAnimating] = useState(true);
@@ -145,7 +147,7 @@ const LandingPage = ({ onGetStarted }) => {
             Pricing
           </button>
           <button 
-            onClick={() => { window.location.href = '/login'; }}
+            onClick={() => navigate('/login')}
             className={`font-medium transition-colors ${
               isDarkTheme ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
             }`}
@@ -153,7 +155,7 @@ const LandingPage = ({ onGetStarted }) => {
             Login
           </button>
           <button 
-            onClick={() => { window.location.href = '/register'; }}
+            onClick={() => navigate('/register')}
             className={`px-4 py-2 border-2 rounded-full font-semibold transition-all duration-300 ${
               isDarkTheme 
                 ? 'border-emerald-500 text-emerald-400 hover:bg-emerald-500/10' 

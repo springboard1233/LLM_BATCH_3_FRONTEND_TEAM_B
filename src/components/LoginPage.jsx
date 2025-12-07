@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Shield, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { apiService } from '../services/api'; // ✅ use same central API helper
 
 const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -36,15 +38,18 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
 
       // apiService.loginRequest() already:
       // - calls /auth/login
-      // - stores { access_token, user } in localStorage
+      // - stores user in localStorage
       // We just notify the parent app:
       if (onLogin && response?.user) {
         onLogin({
           email: response.user.email,
-          name: response.user.name || response.user.email.split('@')[0],
-          role: 'Admin User', // or response.user.role if you add it later
+          name: response.user.full_name || response.user.email.split('@')[0],
+          role: response.user.role || 'analyst',
         });
       }
+      
+      // Navigate to dashboard after successful login
+      navigate('/dashboard');
     } catch (err) {
       console.error('Login failed:', err);
       setError(err?.message || 'Failed to sign in. Please try again.');
@@ -200,7 +205,13 @@ const LoginPage = ({ onLogin, onSwitchToSignup, onContinueAsGuest }) => {
               Don&apos;t have an account?{' '}
               <button
                 type="button"
-                onClick={onSwitchToSignup}
+                onClick={() => {
+                  if (onSwitchToSignup) {
+                    onSwitchToSignup();
+                  } else {
+                    navigate('/register');
+                  }
+                }}
                 className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
               >
                 Sign up

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { authAPI, profileAPI } from '../lib/api';
+import { apiService } from '../services/api';
 import type { User, Profile } from '../lib/types';
 
 interface AuthContextType {
@@ -31,22 +31,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loadUser();
   }, []);
 
-  const loadUser = async () => {
+  const loadUser = () => {
+    // Simple auth - load user from localStorage
     try {
-      const { data } = await authAPI.getMe();
-      setUser(data);
-      setProfile(data);
+      const storedUser = apiService.getCurrentUser();
+      if (storedUser) {
+        setUser(storedUser);
+        setProfile(storedUser);
+      }
     } catch (error) {
-      console.error('Error loading user:', error);
+      console.error('Error loading user from localStorage:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const login = async (email: string, password: string) => {
-    const { data } = await authAPI.login({ email, password });
-    setUser(data.user);
-    setProfile(data.user);
+    const data = await apiService.loginRequest({ email, password });
+    if (data.user) {
+      setUser(data.user);
+      setProfile(data.user);
+    }
   };
 
   const register = async (email: string, password: string, fullName: string, role?: string) => {
@@ -57,10 +62,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       console.log('Making API call to /auth/register...');
-      const { data } = await authAPI.register({ email, password, full_name: fullName, role });
+      const data = await apiService.signupRequest({ 
+        name: fullName, 
+        email, 
+        password 
+      });
       console.log('API call successful, response:', data);
-      setUser(data.user);
-      setProfile(data.user);
+      if (data.user) {
+        setUser(data.user);
+        setProfile(data.user);
+      }
     } catch (error) {
       console.error('API call failed:', error);
       throw error;
@@ -69,7 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await authAPI.logout();
+      await apiService.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

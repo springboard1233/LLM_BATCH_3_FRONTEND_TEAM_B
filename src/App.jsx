@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import ThemeAwareLandingPage from './components/ThemeAwareLandingPage.jsx'
 import SettingsPage from './components/SettingsPage.jsx'
 import DashboardLayout from '../DashboardLayout.jsx'
@@ -7,6 +8,9 @@ import NavigationSidebar from '../NavigationSidebar.jsx'
 import SystemStatus from '../SystemStatus.jsx'
 import QuickStats from '../QuickStats.jsx'
 import { SettingsProvider, useSettings } from './contexts/SettingsContext.jsx'
+import LoginPage from './components/LoginPage.jsx'
+import SignupPage from './components/SignupPage.jsx'
+import { AuthProvider } from './contexts/AuthContext'
 
 import DataUploadZone from './components/DataUploadZone'
 import LiveToggle from './components/LiveToggle'
@@ -28,18 +32,28 @@ import RiskAnalysis from '../RiskAnalysis'
 
 function App() {
   return (
-    <SettingsProvider>
-      <DashboardProvider>
-        <AppContent />
-      </DashboardProvider>
-    </SettingsProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <SettingsProvider>
+          <DashboardProvider>
+            <AppContent />
+          </DashboardProvider>
+        </SettingsProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 
 function AppContent() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
   // 🔥 THE FIX — IMPORT EFFECTIVE THEME
   const { effectiveTheme } = useSettings();
   const isDarkTheme = effectiveTheme === 'dark';
+  
+  // Check if we're on a route that should show landing page
+  const isLandingRoute = location.pathname === '/' || location.pathname === '/landing';
 
   const [isLiveStream, setIsLiveStream] = useState(false)
   const [uploadedFile, setUploadedFile] = useState(null)
@@ -288,30 +302,35 @@ function AppContent() {
     }
   }
 
-  if (currentView === 'landing') {
-    return <ThemeAwareLandingPage onGetStarted={() => setCurrentView('dashboard')} />
-  }
-
+  // Handle routing - show auth pages or landing page
   return (
-    <div className={`flex flex-col md:flex-row h-screen relative overflow-hidden transition-colors duration-300 ${
-      isDarkTheme 
-        ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
-        : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
-    }`}>
-      <NavigationSidebar
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        items={navigationItems}
-        isMobileMenuOpen={isMobileMenuOpen}
-        onMobileMenuClose={() => setIsMobileMenuOpen(false)}
-      />
+    <Routes>
+      <Route path="/login" element={<LoginPage onLogin={() => navigate('/dashboard')} onSwitchToSignup={() => navigate('/register')} onContinueAsGuest={() => navigate('/dashboard')} />} />
+      <Route path="/register" element={<SignupPage onSignup={() => navigate('/dashboard')} onSwitchToLogin={() => navigate('/login')} onContinueAsGuest={() => navigate('/dashboard')} />} />
+      <Route path="/" element={<ThemeAwareLandingPage onGetStarted={() => { setCurrentView('dashboard'); navigate('/dashboard'); }} />} />
+      <Route path="/landing" element={<ThemeAwareLandingPage onGetStarted={() => { setCurrentView('dashboard'); navigate('/dashboard'); }} />} />
+      <Route path="/dashboard" element={
+        <div className={`flex flex-col md:flex-row h-screen relative overflow-hidden transition-colors duration-300 ${
+          isDarkTheme 
+            ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
+            : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+        }`}>
+          <NavigationSidebar
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            items={navigationItems}
+            isMobileMenuOpen={isMobileMenuOpen}
+            onMobileMenuClose={() => setIsMobileMenuOpen(false)}
+          />
 
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-        {renderHeader()}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">{renderMainContent()}</main>
-      </div>
-    </div>
-  )
+          <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+            {renderHeader()}
+            <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">{renderMainContent()}</main>
+          </div>
+        </div>
+      } />
+    </Routes>
+  );
 }
 
 export default App

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import {
   Bell,
   Settings,
@@ -12,10 +13,12 @@ import {
   Info,
   Home,
   Menu,
+  LogOut,
 } from "lucide-react";
 import SettingsPanel from './src/components/SettingsPanel'
 import { useTranslation } from './src/hooks/useTranslation'
 import { useSettings } from './src/contexts/SettingsContext'
+import { useAuth } from './src/contexts/AuthContext'
 import useResponsive from './src/hooks/useResponsive'
 
 export default function DashboardHeader({
@@ -28,12 +31,25 @@ export default function DashboardHeader({
 }) {
   const { t } = useTranslation();
   const { effectiveTheme } = useSettings();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const isDarkTheme = effectiveTheme === 'dark';
   const { isMobile } = useResponsive();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+      setShowUserMenu(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
   const [notifications, setNotifications] = useState(() => {
     const baseNotifications = [
       {
@@ -113,14 +129,30 @@ export default function DashboardHeader({
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === "Escape" && showNotifications) {
-        setShowNotifications(false);
+      if (event.key === "Escape") {
+        if (showNotifications) setShowNotifications(false);
+        if (showUserMenu) setShowUserMenu(false);
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [showNotifications]);
+  }, [showNotifications, showUserMenu]);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    if (!showUserMenu) return;
+    
+    const handleClickOutside = (event) => {
+      const userMenuElement = event.target.closest('[data-user-menu]');
+      if (!userMenuElement) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showUserMenu]);
 
   return (
     <header className={`px-4 md:px-6 py-3 md:py-4 relative z-10 border-b ${
@@ -235,16 +267,81 @@ export default function DashboardHeader({
             <Settings className="w-5 h-5 md:w-6 md:h-6" />
           </button>
 
-          {/* User */}
-          <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg border ${
-            isDarkTheme 
-              ? 'bg-white/10 backdrop-blur-sm border-white/10' 
-              : 'bg-gray-100 border-gray-300'
-          }`}>
-            <User className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />
-            <span className={`text-sm font-medium whitespace-nowrap ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-              {t("app.adminUser")}
-            </span>
+          {/* User Profile with Dropdown */}
+          <div className="relative" data-user-menu>
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg border transition-colors ${
+                isDarkTheme 
+                  ? 'bg-white/10 backdrop-blur-sm border-white/10 hover:bg-white/20' 
+                  : 'bg-gray-100 border-gray-300 hover:bg-gray-200'
+              }`}
+            >
+              <User className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />
+              <span className={`text-sm font-medium whitespace-nowrap ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                {user ? (user.full_name || user.email?.split('@')[0] || 'User') : t("app.adminUser")}
+              </span>
+            </button>
+            
+            {/* User Dropdown Menu */}
+            {showUserMenu && (
+              <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-lg border z-50 ${
+                isDarkTheme 
+                  ? 'bg-black/90 backdrop-blur-md border-white/10' 
+                  : 'bg-white border-gray-200'
+              }`}>
+                {user && (
+                  <div className={`p-3 border-b ${isDarkTheme ? 'border-white/10' : 'border-gray-200'}`}>
+                    <p className={`text-sm font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                      {user.full_name || user.email?.split('@')[0] || 'User'}
+                    </p>
+                    <p className={`text-xs mt-1 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {user.email || 'No email'}
+                    </p>
+                    {user.role && (
+                      <span className={`inline-block mt-2 px-2 py-0.5 text-xs rounded ${
+                        isDarkTheme 
+                          ? 'bg-emerald-500/20 text-emerald-400' 
+                          : 'bg-emerald-100 text-emerald-700'
+                      }`}>
+                        {user.role}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <div className="p-1">
+                  {user && (
+                    <button
+                      onClick={handleLogout}
+                      className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        isDarkTheme 
+                          ? 'text-red-400 hover:bg-red-500/20' 
+                          : 'text-red-600 hover:bg-red-50'
+                      }`}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  )}
+                  {!user && (
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        navigate('/login');
+                      }}
+                      className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        isDarkTheme 
+                          ? 'text-emerald-400 hover:bg-emerald-500/20' 
+                          : 'text-emerald-600 hover:bg-emerald-50'
+                      }`}
+                    >
+                      <User className="w-4 h-4" />
+                      <span>Login</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -276,16 +373,70 @@ export default function DashboardHeader({
           </button>
 
           {/* User - Icon only on mobile */}
-          <button
-            className={`p-2 rounded-lg border min-w-[44px] min-h-[44px] flex items-center justify-center ${
-              isDarkTheme 
-                ? 'bg-white/10 backdrop-blur-sm border-white/10' 
-                : 'bg-gray-100 border-gray-300'
-            }`}
-            title={t("app.adminUser")}
-          >
-            <User className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" />
-          </button>
+          <div className="relative" data-user-menu>
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className={`p-2 rounded-lg border min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                isDarkTheme 
+                  ? 'bg-white/10 backdrop-blur-sm border-white/10 hover:bg-white/20' 
+                  : 'bg-gray-100 border-gray-300 hover:bg-gray-200'
+              }`}
+              title={user ? (user.full_name || user.email) : t("app.adminUser")}
+            >
+              <User className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" />
+            </button>
+            
+            {/* Mobile User Menu */}
+            {showUserMenu && (
+              <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-lg border z-50 ${
+                isDarkTheme 
+                  ? 'bg-black/90 backdrop-blur-md border-white/10' 
+                  : 'bg-white border-gray-200'
+              }`}>
+                {user && (
+                  <div className={`p-3 border-b ${isDarkTheme ? 'border-white/10' : 'border-gray-200'}`}>
+                    <p className={`text-sm font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                      {user.full_name || user.email?.split('@')[0] || 'User'}
+                    </p>
+                    <p className={`text-xs mt-1 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {user.email || 'No email'}
+                    </p>
+                  </div>
+                )}
+                <div className="p-1">
+                  {user && (
+                    <button
+                      onClick={handleLogout}
+                      className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        isDarkTheme 
+                          ? 'text-red-400 hover:bg-red-500/20' 
+                          : 'text-red-600 hover:bg-red-50'
+                      }`}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  )}
+                  {!user && (
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        navigate('/login');
+                      }}
+                      className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        isDarkTheme 
+                          ? 'text-emerald-400 hover:bg-emerald-500/20' 
+                          : 'text-emerald-600 hover:bg-emerald-50'
+                      }`}
+                    >
+                      <User className="w-4 h-4" />
+                      <span>Login</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Shield, Mail, Lock, User, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { apiService } from '../services/api'; // ✅ connect to backend
 
 const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -61,7 +63,8 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
 
     try {
       // ------------------------------
-      // 1️⃣ SIGNUP CALL → /api/auth/signup
+      // SIGNUP CALL → /api/auth/register
+      // signupRequest already stores user in localStorage
       // ------------------------------
       const signupRes = await apiService.signupRequest({
         name: formData.name,
@@ -69,23 +72,17 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
         password: formData.password,
       });
 
-      // Auto login after successful signup
-      // ------------------------------
-      // 2️⃣ LOGIN CALL → /api/auth/login
-      // ------------------------------
-      const loginRes = await apiService.loginRequest({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      // Notify parent (kept exactly same)
-      if (onSignup) {
+      // Notify parent
+      if (onSignup && signupRes?.user) {
         onSignup({
-          email: loginRes?.user?.email,
-          name: loginRes?.user?.name || formData.name,
-          role: 'User',
+          email: signupRes.user.email,
+          name: signupRes.user.full_name || formData.name,
+          role: signupRes.user.role || 'User',
         });
       }
+
+      // Navigate to dashboard after successful signup
+      navigate('/dashboard');
 
     } catch (err) {
       console.error('Signup error:', err);
@@ -271,7 +268,13 @@ const SignupPage = ({ onSignup, onSwitchToLogin, onContinueAsGuest }) => {
               Already have an account?{' '}
               <button
                 type="button"
-                onClick={onSwitchToLogin}
+                onClick={() => {
+                  if (onSwitchToLogin) {
+                    onSwitchToLogin();
+                  } else {
+                    navigate('/login');
+                  }
+                }}
                 className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
               >
                 Sign in
