@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import useResponsive from '../hooks/useResponsive'
 
 function ExportControls({
   exportFormat,
@@ -14,6 +15,8 @@ function ExportControls({
   setToast,
   transactions
 }) {
+  const { isMobile } = useResponsive()
+
   const generatePreviewData = () => {
     // Filter transactions based on date range
     const filteredData = transactions.filter(tx => {
@@ -69,60 +72,130 @@ function ExportControls({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Format Selection */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Export Format</label>
-          <select
-            value={exportFormat}
-            onChange={(e) => setExportFormat(e.target.value)}
-            className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-          >
-            <option value="CSV">CSV</option>
-            <option value="JSON">JSON</option>
-            <option value="Report">Report</option>
-          </select>
-        </div>
+    <div className="space-y-4 md:space-y-6">
+      {/* Mobile: Stack all controls vertically */}
+      {isMobile ? (
+        <div className="space-y-4">
+          {/* Format Selection */}
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Export Format
+            </label>
+            <select
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value)}
+              className="w-full p-3 min-h-[44px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+            >
+              <option value="CSV">CSV</option>
+              <option value="JSON">JSON</option>
+              <option value="Report">Report</option>
+            </select>
+          </div>
 
-        {/* Date Range */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Start Date</label>
-          <input
-            type="date"
-            value={startDate.toISOString().split('T')[0]}
-            onChange={(e) => setStartDate(new Date(e.target.value))}
-            className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-          />
-        </div>
+          {/* Date Range */}
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Start Date
+            </label>
+            <input
+              type="date"
+              value={startDate.toISOString().split('T')[0]}
+              onChange={(e) => setStartDate(new Date(e.target.value))}
+              className="w-full p-3 min-h-[44px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">End Date</label>
-          <input
-            type="date"
-            value={endDate.toISOString().split('T')[0]}
-            onChange={(e) => setEndDate(new Date(e.target.value))}
-            className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              End Date
+            </label>
+            <input
+              type="date"
+              value={endDate.toISOString().split('T')[0]}
+              onChange={(e) => setEndDate(new Date(e.target.value))}
+              className="w-full p-3 min-h-[44px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+            />
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-end gap-2">
-          <button
-            onClick={generatePreviewData}
-            className="flex-1 p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
-          >
-            Preview
-          </button>
-          <button
-            onClick={handleExport}
-            disabled={isExporting || !exportData.length}
-            className="flex-1 p-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
-          >
-            {isExporting ? 'Exporting...' : 'Export'}
-          </button>
+          {/* Action Buttons - Full width on mobile */}
+          <div className="space-y-2">
+            <button
+              onClick={generatePreviewData}
+              className="w-full min-h-[44px] p-3 bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-lg transition-colors font-medium text-white"
+            >
+              Preview
+            </button>
+            <button
+              onClick={handleExport}
+              disabled={isExporting || !exportData.length}
+              className="w-full min-h-[44px] p-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors font-medium text-white"
+            >
+              {isExporting ? 'Exporting...' : 'Export'}
+            </button>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* Desktop: Grid layout */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Format Selection */}
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Export Format
+            </label>
+            <select
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value)}
+              className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+            >
+              <option value="CSV">CSV</option>
+              <option value="JSON">JSON</option>
+              <option value="Report">Report</option>
+            </select>
+          </div>
+
+          {/* Date Range */}
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Start Date
+            </label>
+            <input
+              type="date"
+              value={startDate.toISOString().split('T')[0]}
+              onChange={(e) => setStartDate(new Date(e.target.value))}
+              className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              End Date
+            </label>
+            <input
+              type="date"
+              value={endDate.toISOString().split('T')[0]}
+              onChange={(e) => setEndDate(new Date(e.target.value))}
+              className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-end gap-2">
+            <button
+              onClick={generatePreviewData}
+              className="flex-1 p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors font-medium text-white"
+            >
+              Preview
+            </button>
+            <button
+              onClick={handleExport}
+              disabled={isExporting || !exportData.length}
+              className="flex-1 p-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors font-medium text-white"
+            >
+              {isExporting ? 'Exporting...' : 'Export'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

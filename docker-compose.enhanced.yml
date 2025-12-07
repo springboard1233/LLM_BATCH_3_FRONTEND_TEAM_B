@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # Redis for caching and pub/sub messaging
+  redis:
+    image: redis:7-alpine
+    container_name: fraud-dashboard-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - fraud-network
+
+  # InfluxDB for time-series analytics data
+  influxdb:
+    image: influxdb:2.7-alpine
+    container_name: fraud-dashboard-influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - influxdb_config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=frauddashboard123
+      - DOCKER_INFLUXDB_INIT_ORG=fraud-detection
+      - DOCKER_INFLUXDB_INIT_BUCKET=transactions
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=fraud-dashboard-token-12345
+    restart: unless-stopped
+    networks:
+      - fraud-network
+
+  # Elasticsearch for audit log storage and search
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: fraud-dashboard-elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    restart: unless-stopped
+    networks:
+      - fraud-network
+
+  # Nginx for load balancing and reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: fraud-dashboard-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - redis
+      - influxdb
+      - elasticsearch
+    restart: unless-stopped
+    networks:
+      - fraud-network
+
+  # Celery worker for background tasks
+  celery-worker:
+    build:
+      context: ./LLM_BATCH_3_BACKEND_TEAM_B
+      dockerfile: Dockerfile.celery
+    container_name: fraud-dashboard-celery
+    volumes:
+      - ./LLM_BATCH_3_BACKEND_TEAM_B:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MONGODB_URL=mongodb://host.docker.internal:27017
+      - INFLUXDB_URL=http://influxdb:8086
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      - redis
+      - influxdb
+      - elasticsearch
+    restart: unless-stopped
+    networks:
+      - fraud-network
+
+  # Celery beat scheduler
+  celery-beat:
+    build:
+      context: ./LLM_BATCH_3_BACKEND_TEAM_B
+      dockerfile: Dockerfile.celery
+    container_name: fraud-dashboard-celery-beat
+    volumes:
+      - ./LLM_BATCH_3_BACKEND_TEAM_B:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    command: celery -A app.celery beat --loglevel=info
+    depends_on:
+      - redis
+      - celery-worker
+    restart: unless-stopped
+    networks:
+      - fraud-network
+
+volumes:
+  redis_data:
+  influxdb_data:
+  influxdb_config:
+  elasticsearch_data:
+
+networks:
+  fraud-network:
+    driver: bridge

@@ -26,7 +26,7 @@ vi.mock('../../hooks/useTranslation', () => ({
         'settings.preferences.compactModeDesc': 'Use compact display layout'
       }
       return translations[key] || key
-    })
+    }
   })
 }))
 

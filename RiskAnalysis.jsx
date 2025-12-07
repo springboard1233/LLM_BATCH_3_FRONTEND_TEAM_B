@@ -17,9 +17,11 @@ import {
   Scatter,
 } from 'recharts';
 import { TrendingUp, AlertTriangle, Shield, Eye } from 'lucide-react';
+import useResponsive from './src/hooks/useResponsive';
 
 const RiskAnalysis = ({ theme = 'dark' }) => {
   const isDark = theme === 'dark';
+  const { isMobile, isTablet } = useResponsive();
 
   // Mock data for risk distribution
   const riskDistribution = [
@@ -79,6 +81,13 @@ const RiskAnalysis = ({ theme = 'dark' }) => {
 
   const [selectedMetric, setSelectedMetric] = useState('avgRisk');
 
+  // Responsive chart configurations
+  const chartConfig = useMemo(() => ({
+    fontSize: isMobile ? 10 : 12,
+    chartHeight: isMobile ? 250 : 300,
+    pieOuterRadius: isMobile ? 60 : 80,
+  }), [isMobile]);
+
   const getMetricColor = (value) => {
     if (value < 0.2) return 'text-green-500';
     if (value < 0.4) return 'text-yellow-500';
@@ -94,19 +103,19 @@ const RiskAnalysis = ({ theme = 'dark' }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
       <div
-        className={`rounded-xl p-6 shadow-lg border ${
+        className={`rounded-xl p-4 md:p-6 shadow-lg border ${
           isDark
             ? 'bg-gray-800 border-gray-700 text-white'
             : 'bg-white border-gray-200 text-gray-900'
         }`}
       >
-        <h2 className="text-2xl font-bold mb-6">Risk Analysis Dashboard</h2>
+        <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Risk Analysis Dashboard</h2>
 
         {/* Key Risk Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <div
             className={`p-4 rounded-lg border ${
               isDark
@@ -116,10 +125,10 @@ const RiskAnalysis = ({ theme = 'dark' }) => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 mb-1">Avg Risk Score</p>
-                <p className="text-3xl font-bold">0.28</p>
+                <p className="text-xs md:text-sm text-gray-400 mb-1">Avg Risk Score</p>
+                <p className="text-2xl md:text-3xl font-bold">0.28</p>
               </div>
-              <Shield className="w-8 h-8 text-blue-500" />
+              <Shield className="w-6 h-6 md:w-8 md:h-8 text-blue-500" />
             </div>
           </div>
 
@@ -132,10 +141,10 @@ const RiskAnalysis = ({ theme = 'dark' }) => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 mb-1">High Risk Txns</p>
-                <p className="text-3xl font-bold text-red-500">38</p>
+                <p className="text-xs md:text-sm text-gray-400 mb-1">High Risk Txns</p>
+                <p className="text-2xl md:text-3xl font-bold text-red-500">38</p>
               </div>
-              <AlertTriangle className="w-8 h-8 text-red-500" />
+              <AlertTriangle className="w-6 h-6 md:w-8 md:h-8 text-red-500" />
             </div>
           </div>
 
@@ -148,10 +157,10 @@ const RiskAnalysis = ({ theme = 'dark' }) => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 mb-1">Fraud Rate</p>
-                <p className="text-3xl font-bold">2.1%</p>
+                <p className="text-xs md:text-sm text-gray-400 mb-1">Fraud Rate</p>
+                <p className="text-2xl md:text-3xl font-bold">2.1%</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-orange-500" />
+              <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-orange-500" />
             </div>
           </div>
 
@@ -164,35 +173,35 @@ const RiskAnalysis = ({ theme = 'dark' }) => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 mb-1">Active Alerts</p>
-                <p className="text-3xl font-bold">87</p>
+                <p className="text-xs md:text-sm text-gray-400 mb-1">Active Alerts</p>
+                <p className="text-2xl md:text-3xl font-bold">87</p>
               </div>
-              <Eye className="w-8 h-8 text-purple-500" />
+              <Eye className="w-6 h-6 md:w-8 md:h-8 text-purple-500" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Risk Distribution */}
         <div
-          className={`rounded-xl p-6 shadow-lg border ${
+          className={`rounded-xl p-4 md:p-6 shadow-lg border ${
             isDark
               ? 'bg-gray-800 border-gray-700'
               : 'bg-white border-gray-200'
           }`}
         >
-          <h3 className="text-lg font-semibold mb-4">Risk Distribution</h3>
-          <ResponsiveContainer width="100%" height={300}>
+          <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Risk Distribution</h3>
+          <ResponsiveContainer width="100%" height={chartConfig.chartHeight}>
             <PieChart>
               <Pie
                 data={riskDistribution}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ range, count }) => `${range}: ${count}`}
-                outerRadius={80}
+                label={isMobile ? false : ({ range, count }) => `${range}: ${count}`}
+                outerRadius={chartConfig.pieOuterRadius}
                 fill="#8884d8"
                 dataKey="count"
               >
@@ -200,32 +209,47 @@ const RiskAnalysis = ({ theme = 'dark' }) => {
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip contentStyle={{ fontSize: chartConfig.fontSize }} />
+              <Legend wrapperStyle={{ fontSize: chartConfig.fontSize }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
         {/* Risk by Channel */}
         <div
-          className={`rounded-xl p-6 shadow-lg border ${
+          className={`rounded-xl p-4 md:p-6 shadow-lg border ${
             isDark
               ? 'bg-gray-800 border-gray-700'
               : 'bg-white border-gray-200'
           }`}
         >
-          <h3 className="text-lg font-semibold mb-4">Average Risk by Channel</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={riskByChannel}>
+          <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Average Risk by Channel</h3>
+          <ResponsiveContainer width="100%" height={chartConfig.chartHeight}>
+            <BarChart 
+              data={riskByChannel}
+              margin={isMobile 
+                ? { top: 5, right: 5, left: -10, bottom: 5 }
+                : { top: 5, right: 20, left: 0, bottom: 5 }
+              }
+            >
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke={isDark ? '#4b5563' : '#e0e0e0'}
               />
-              <XAxis dataKey="channel" stroke={isDark ? '#9ca3af' : '#6b7280'} />
-              <YAxis stroke={isDark ? '#9ca3af' : '#6b7280'} />
+              <XAxis 
+                dataKey="channel" 
+                stroke={isDark ? '#9ca3af' : '#6b7280'}
+                fontSize={chartConfig.fontSize}
+              />
+              <YAxis 
+                stroke={isDark ? '#9ca3af' : '#6b7280'}
+                fontSize={chartConfig.fontSize}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: isDark ? '#1f2937' : '#f9fafb',
                   border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                  fontSize: chartConfig.fontSize,
                 }}
               />
               <Bar dataKey="avgRisk" fill="#3B82F6" />
@@ -236,33 +260,52 @@ const RiskAnalysis = ({ theme = 'dark' }) => {
 
       {/* Risk Trend */}
       <div
-        className={`rounded-xl p-6 shadow-lg border ${
+        className={`rounded-xl p-4 md:p-6 shadow-lg border ${
           isDark
             ? 'bg-gray-800 border-gray-700'
             : 'bg-white border-gray-200'
         }`}
       >
-        <h3 className="text-lg font-semibold mb-4">Risk Trend Over Time</h3>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={riskTrend}>
+        <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Risk Trend Over Time</h3>
+        <ResponsiveContainer width="100%" height={isMobile ? 300 : 350}>
+          <LineChart 
+            data={riskTrend}
+            margin={isMobile 
+              ? { top: 5, right: 5, left: -10, bottom: 5 }
+              : { top: 5, right: 20, left: 0, bottom: 5 }
+            }
+          >
             <CartesianGrid
               strokeDasharray="3 3"
               stroke={isDark ? '#4b5563' : '#e0e0e0'}
             />
-            <XAxis dataKey="date" stroke={isDark ? '#9ca3af' : '#6b7280'} />
-            <YAxis stroke={isDark ? '#9ca3af' : '#6b7280'} yAxisId="left" />
+            <XAxis 
+              dataKey="date" 
+              stroke={isDark ? '#9ca3af' : '#6b7280'}
+              fontSize={chartConfig.fontSize}
+              angle={isMobile ? -45 : 0}
+              textAnchor={isMobile ? 'end' : 'middle'}
+              height={isMobile ? 60 : 30}
+            />
+            <YAxis 
+              stroke={isDark ? '#9ca3af' : '#6b7280'} 
+              yAxisId="left"
+              fontSize={chartConfig.fontSize}
+            />
             <YAxis
               stroke={isDark ? '#9ca3af' : '#6b7280'}
               yAxisId="right"
               orientation="right"
+              fontSize={chartConfig.fontSize}
             />
             <Tooltip
               contentStyle={{
                 backgroundColor: isDark ? '#1f2937' : '#f9fafb',
                 border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                fontSize: chartConfig.fontSize,
               }}
             />
-            <Legend />
+            <Legend wrapperStyle={{ fontSize: chartConfig.fontSize }} />
             <Line
               yAxisId="left"
               type="monotone"
@@ -285,15 +328,15 @@ const RiskAnalysis = ({ theme = 'dark' }) => {
 
       {/* Risk by Customer Segment */}
       <div
-        className={`rounded-xl p-6 shadow-lg border ${
+        className={`rounded-xl p-4 md:p-6 shadow-lg border ${
           isDark
             ? 'bg-gray-800 border-gray-700'
             : 'bg-white border-gray-200'
         }`}
       >
-        <h3 className="text-lg font-semibold mb-6">Risk Analysis by Customer Segment</h3>
+        <h3 className="text-base md:text-lg font-semibold mb-4 md:mb-6">Risk Analysis by Customer Segment</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {riskMetrics.map((metric) => (
             <div
               key={metric.segment}

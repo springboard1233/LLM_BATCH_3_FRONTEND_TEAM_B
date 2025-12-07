@@ -72,6 +72,181 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Smooth scrolling for better mobile experience */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Improve touch interactions on mobile */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  -webkit-touch-callout: none;
+}
+
+/* Better focus states for accessibility and touch */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Ensure smooth transitions for interactive elements */
+button,
+a,
+input,
+select,
+textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Improve dropdown menu touch targets on mobile */
+select {
+  min-height: 44px;
+  padding: 0.75rem;
+}
+
+/* Better spacing for form elements on mobile */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Responsive Typography - Mobile First */
+body {
+  font-size: 14px; /* Base font size for mobile (at least 14px) */
+  line-height: 1.5; /* Improved readability */
+}
+
+@media (min-width: 640px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    font-size: 16px;
+  }
+}
+
+/* Responsive Headings */
+h1 {
+  font-size: 1.75rem; /* 28px on mobile */
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.5rem; /* 24px on mobile */
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.25rem; /* 20px on mobile */
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 1.125rem; /* 18px on mobile */
+  line-height: 1.4;
+}
+
+h5, h6 {
+  font-size: 1rem; /* 16px on mobile */
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 2rem; /* 32px on tablet */
+  }
+  
+  h2 {
+    font-size: 1.75rem; /* 28px on tablet */
+  }
+  
+  h3 {
+    font-size: 1.5rem; /* 24px on tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  h1 {
+    font-size: 2.25rem; /* 36px on desktop */
+  }
+  
+  h2 {
+    font-size: 2rem; /* 32px on desktop */
+  }
+  
+  h3 {
+    font-size: 1.75rem; /* 28px on desktop */
+  }
+  
+  h4 {
+    font-size: 1.25rem; /* 20px on desktop */
+  }
+}
+
+/* Ensure readable line heights for all text */
+p, li, td, th {
+  line-height: 1.6;
+}
+
+/* Small text should still be readable on mobile */
+.text-xs {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.5;
+}
+
+.text-sm {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.5;
+}
+
+/* Responsive Spacing Utilities */
+/* Mobile-first approach: smaller spacing on mobile, larger on desktop */
+.space-y-responsive > * + * {
+  margin-top: 1rem; /* 16px on mobile */
+}
+
+@media (min-width: 768px) {
+  .space-y-responsive > * + * {
+    margin-top: 1.5rem; /* 24px on tablet+ */
+  }
+}
+
+.gap-responsive {
+  gap: 1rem; /* 16px on mobile */
+}
+
+@media (min-width: 768px) {
+  .gap-responsive {
+    gap: 1.5rem; /* 24px on tablet+ */
+  }
+}
+
+/* Ensure adequate touch spacing on mobile */
+@media (max-width: 768px) {
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px; /* Minimum touch target size */
+  }
+  
+  /* Add spacing between interactive elements */
+  button + button,
+  a + a {
+    margin-left: 0.5rem;
+  }
+}
+
 /* Theme-aware utility classes */
 .bg-theme-primary {
   background-color: var(--bg-primary);

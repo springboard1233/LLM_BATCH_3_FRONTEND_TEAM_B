@@ -13,11 +13,24 @@
   },
   "dependencies": {
     "axios": "^1.13.1",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-leaflet": "^4.2.1",
     "react-router-dom": "^7.9.5",
-    "recharts": "^3.3.0"
+    "recharts": "^3.3.0",
+    "socket.io-client": "^4.7.4",
+    "react-grid-layout": "^1.4.4",
+    "d3": "^7.8.5",
+    "react-query": "^3.39.3",
+    "@tanstack/react-query": "^5.17.9",
+    "react-hook-form": "^7.48.2",
+    "react-select": "^5.8.0",
+    "date-fns": "^3.0.6",
+    "lodash": "^4.17.21",
+    "uuid": "^9.0.1",
+    "js-cookie": "^3.0.5"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -25,6 +38,10 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
+    "@types/d3": "^7.4.3",
+    "@types/lodash": "^4.14.202",
+    "@types/uuid": "^9.0.7",
+    "@types/js-cookie": "^3.0.6",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.55.0",
@@ -35,6 +52,7 @@
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.6",
     "vite": "^5.0.8",
-    "vitest": "^4.0.4"
+    "vitest": "^4.0.4",
+    "fast-check": "^3.15.1"
   }
 }
