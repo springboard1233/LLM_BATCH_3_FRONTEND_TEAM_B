@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Shield } from 'lucide-react';
@@ -14,14 +14,24 @@ export const RegisterPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('=== REGISTRATION FORM SUBMITTED ===');
+    console.log('Email:', email);
+    console.log('Name:', name);
+    console.log('Password length:', password.length);
+    
     setError('');
     setLoading(true);
 
     try {
+      console.log('Calling register function...');
       await register(email, password, name);
+      console.log('Register function completed successfully');
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to register');
+      console.error('Registration error:', err);
+      const backendMessage =
+        err?.response?.data?.detail || err?.response?.data?.message;
+      setError(backendMessage || 'Failed to register');
     } finally {
       setLoading(false);
     }

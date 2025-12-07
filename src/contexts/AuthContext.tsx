@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { authAPI, profileAPI } from '../lib/api';
 import type { User, Profile } from '../lib/types';
 
@@ -15,9 +15,9 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   loading: true,
-  login: async () => {},
-  register: async () => {},
-  logout: async () => {},
+  login: async () => { },
+  register: async () => { },
+  logout: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -28,12 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      loadUser();
-    } else {
-      setLoading(false);
-    }
+    loadUser();
   }, []);
 
   const loadUser = async () => {
@@ -43,7 +38,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setProfile(data);
     } catch (error) {
       console.error('Error loading user:', error);
-      localStorage.removeItem('token');
     } finally {
       setLoading(false);
     }
@@ -51,16 +45,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     const { data } = await authAPI.login({ email, password });
-    localStorage.setItem('token', data.token);
     setUser(data.user);
     setProfile(data.user);
   };
 
   const register = async (email: string, password: string, fullName: string, role?: string) => {
-    const { data } = await authAPI.register({ email, password, fullName, role });
-    localStorage.setItem('token', data.token);
-    setUser(data.user);
-    setProfile(data.user);
+    console.log('=== AuthContext register called ===');
+    console.log('Email:', email);
+    console.log('Full name:', fullName);
+    console.log('Role:', role);
+
+    try {
+      console.log('Making API call to /auth/register...');
+      const { data } = await authAPI.register({ email, password, full_name: fullName, role });
+      console.log('API call successful, response:', data);
+      setUser(data.user);
+      setProfile(data.user);
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
@@ -69,7 +73,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('token');
       setUser(null);
       setProfile(null);
     }

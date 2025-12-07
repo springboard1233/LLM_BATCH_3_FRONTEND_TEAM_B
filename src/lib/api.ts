@@ -1,20 +1,15 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Use a safe cast so TypeScript doesn't complain about import.meta.env
+const API_URL =
+  (import.meta as any).env?.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  withCredentials: true,
 });
 
 api.interceptors.response.use(
@@ -29,7 +24,7 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  register: (data: { email: string; password: string; fullName: string; role?: string }) =>
+  register: (data: { email: string; password: string; full_name?: string; role?: string }) =>
     api.post('/auth/register', data),
   login: (data: { email: string; password: string }) =>
     api.post('/auth/login', data),
