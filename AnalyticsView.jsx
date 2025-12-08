@@ -17,6 +17,12 @@ import {
 } from 'recharts';
 import useResponsive from './src/hooks/useResponsive';
 
+// Centralized API base to work in dev (localhost) and deployed builds
+const API_BASE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
+  'https://fraud-detection-backend-zvxe.onrender.com/api' ||
+  'http://127.0.0.1:8000/api';
+
 // color codes
 const COLORS = {
   primary: '#3B82F6', //Blue
@@ -58,7 +64,7 @@ const AnalyticsView = ({ data }) => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch('http://localhost:8000/api/analytics/dashboard');
+        const response = await fetch(`${API_BASE_URL}/analytics/dashboard`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

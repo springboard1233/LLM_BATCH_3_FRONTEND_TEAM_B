@@ -6,6 +6,11 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+# Accept build arguments for environment variables
+# Default to hosted backend; override at build time for other targets
+ARG VITE_API_URL=https://fraud-detection-backend-zvxe.onrender.com/api
+ENV VITE_API_URL=$VITE_API_URL
+
 # Copy package files
 COPY package*.json ./
 
