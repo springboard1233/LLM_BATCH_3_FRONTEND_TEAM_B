@@ -1,8 +1,11 @@
 import axios from 'axios';
 
 // Use a safe cast so TypeScript doesn't complain about import.meta.env
+// Prefer env override; otherwise hosted, then local
 const API_URL =
-  (import.meta as any).env?.VITE_API_URL || 'http://127.0.0.1:8000/api';
+  (import.meta as any).env?.VITE_API_URL ||
+  'https://fraud-detection-backend-zvxe.onrender.com/api' ||
+  'http://127.0.0.1:8000/api';
 
 const api = axios.create({
   baseURL: API_URL,

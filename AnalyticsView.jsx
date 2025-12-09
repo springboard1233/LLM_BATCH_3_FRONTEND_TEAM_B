@@ -17,6 +17,12 @@ import {
 } from 'recharts';
 import useResponsive from './src/hooks/useResponsive';
 
+// Centralized API base to work in dev (localhost) and deployed builds
+const API_BASE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
+  'https://fraud-detection-backend-zvxe.onrender.com/api' ||
+  'http://127.0.0.1:8000/api';
+
 // color codes
 const COLORS = {
   primary: '#3B82F6', //Blue
@@ -58,7 +64,7 @@ const AnalyticsView = ({ data }) => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch('http://localhost:8000/api/analytics/dashboard');
+        const response = await fetch(`${API_BASE_URL}/analytics/dashboard`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -494,74 +500,7 @@ const AnalyticsView = ({ data }) => {
         </div>
       </div>
 
-      {/* 🔹 Feature Importance section */}
-      <div
-        className="rounded-xl shadow-sm border p-4 md:p-6"
-        style={{
-          backgroundColor: COLORS.white,
-          borderColor: COLORS.grayBorder,
-        }}
-      >
-        <h3
-          className="text-base md:text-lg font-semibold mb-3 md:mb-4"
-          style={{ color: COLORS.grayTitle }}
-        >
-          Model Feature Importance
-        </h3>
-
-        {featureImportanceData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={chartConfig.chartHeight}>
-            <BarChart
-              data={featureImportanceData}
-              layout="vertical"
-              margin={isMobile 
-                ? { top: 5, right: 10, left: 10, bottom: 5 }
-                : { top: 5, right: 20, left: 40, bottom: 5 }
-              }
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={COLORS.grayBorder}
-              />
-              <XAxis
-                type="number"
-                fontSize={chartConfig.fontSize}
-                stroke={COLORS.grayText}
-                tickFormatter={(val) => `${(val * 100).toFixed(0)}%`}
-              />
-              <YAxis
-                type="category"
-                dataKey="feature"
-                fontSize={chartConfig.fontSize}
-                stroke={COLORS.grayText}
-                width={isMobile ? 80 : 120}
-              />
-              <Tooltip
-                formatter={(value) => [
-                  `${(value * 100).toFixed(2)}%`,
-                  'Importance',
-                ]}
-                contentStyle={{ fontSize: chartConfig.fontSize }}
-              />
-              <Bar
-                dataKey="importance"
-                fill={COLORS.primary}
-                radius={[0, 4, 4, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <p className="text-sm" style={{ color: COLORS.grayText }}>
-            Feature importance data is not available. Make sure your backend
-            includes a <code>feature_importance</code> field in the response
-            from <code>/api/analytics/dashboard</code> (for example, as an
-            array of objects like
-            {" [{ feature: 'transaction_amount', importance: 0.35 }, ... ] "}
-            or a mapping of feature name to importance).
-          </p>
-        )}
-      </div>
-
+      
       {/* Transaction Activity Heatmap section*/}
       <div
         className="rounded-xl shadow-sm border p-4 md:p-6"

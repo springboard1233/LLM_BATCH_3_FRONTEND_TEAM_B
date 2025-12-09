@@ -1,4 +1,9 @@
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// Resolve API base at build/runtime without relying on Node's process in browser
+// Prefer env override; otherwise hosted, then local
+const API_BASE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
+  'https://fraud-detection-backend-zvxe.onrender.com/api' ||
+  'http://127.0.0.1:8000/api';
 
 class ApiService {
   async makeRequest(endpoint, options = {}) {
