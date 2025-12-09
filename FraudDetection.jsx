@@ -210,18 +210,7 @@ const FraudDetection = () => {
           </div>
         </form>
 
-        <div className={`mt-4 md:mt-6 text-xs md:text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
-          <p>
-            Expected payload format:
-            <span className={`block font-mono text-xs mt-2 p-2 md:p-3 rounded-lg border overflow-x-auto ${
-              isDarkTheme 
-                ? 'text-gray-300 bg-black/20 border-white/5' 
-                : 'text-gray-700 bg-gray-50 border-gray-200'
-            }`}>
-              {JSON.stringify(DEFAULT_PAYLOAD, null, 2)}
-            </span>
-          </p>
-        </div>
+        
       </div>
 
       <div className={`rounded-2xl p-4 md:p-6 border ${
